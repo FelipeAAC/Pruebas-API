@@ -8,5 +8,5 @@ Esta es una api creada para testeo del proyecto semestral de integración, posib
 
 1. Clonar el repositorio:
 ```bash
-git clone URL
+git https://github.com/FelipeAAC/Pruebas-API.git
 ```
