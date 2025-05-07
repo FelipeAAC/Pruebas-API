@@ -2,7 +2,6 @@ from fastapi import FastAPI, HTTPException, Header
 import oracledb
 from typing import Optional
 
-
 app = FastAPI()
 
 #Conexión con OracleDB
@@ -16,7 +15,7 @@ def get_conexion():
 
 # CRUD Ciudad
 
-@app.get("/ciudad")
+@app.get("/ciudadget")
 def listar_ciudad():
     try:
         cone = get_conexion()
@@ -34,7 +33,7 @@ def listar_ciudad():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/ciudad/{id_ciudad}")
+@app.get("/ciudadgetid/{id_ciudad}")
 def obtener_ciudad(id_ciudad: int):
     try:
         cone = get_conexion()
@@ -51,15 +50,15 @@ def obtener_ciudad(id_ciudad: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/ciudad")
-def agregar_ciudad(descripcion: str):
+@app.post("/ciudadpost")
+def agregar_ciudad(id_ciudad: int, descripcion: str):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-                INSERT INTO ciudad (descripcion)
-                VALUES(:descripcion)
-        """, {"descripcion": descripcion})
+            INSERT INTO ciudad (id_ciudad, descripcion)
+            VALUES (:id_ciudad, :descripcion)
+        """, {"id_ciudad": id_ciudad, "descripcion": descripcion})
         cone.commit()
         cursor.close()
         cone.close()
@@ -67,7 +66,7 @@ def agregar_ciudad(descripcion: str):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/ciudad/{id_ciudad}")
+@app.put("/ciudadputid/{id_ciudad}")
 def actualizar_ciudad(id_ciudad: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -89,7 +88,7 @@ def actualizar_ciudad(id_ciudad: int, descripcion: str):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/ciudad/{id_ciudad}")
+@app.delete("/ciudaddelete/{id_ciudad}")
 def eliminar_ciudad(id_ciudad: int):
     try:
         cone = get_conexion()
@@ -107,7 +106,7 @@ def eliminar_ciudad(id_ciudad: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/ciudad/{id_ciudad}")
+@app.patch("/ciudadpatch/{id_ciudad}")
 def actualizar_parcial_ciudad(id_ciudad: int, descripcion: Optional[str] = None):
     try:
         if not descripcion:
@@ -134,7 +133,7 @@ def actualizar_parcial_ciudad(id_ciudad: int, descripcion: Optional[str] = None)
 
 # CRUD Sucursal
 
-@app.get("/sucursal")
+@app.get("/sucursalget")
 def listar_sucursal():
     try:
         cone = get_conexion()
@@ -154,7 +153,7 @@ def listar_sucursal():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/sucursal/{id_sucursal}")
+@app.get("/sucursalgetid/{id_sucursal}")
 def obtener_sucursal(id_sucursal: int):
     try:
         cone = get_conexion()
@@ -171,13 +170,13 @@ def obtener_sucursal(id_sucursal: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/sucursal")
+@app.post("/sucursalpost")
 def agregar_sucursal(nombre_sucursal: str, id_ciudad: int, direccion: Optional[str] = None):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-                INSERT INTO sucursal (nombre_sucursal, direccion, id_ciudad)
+                INSERT INTO sucursal
                 VALUES(:nombre_sucursal, :direccion, :id_ciudad)
         """, {"nombre_sucursal": nombre_sucursal, "direccion": direccion, "id_ciudad": id_ciudad})
         cone.commit()
@@ -187,7 +186,7 @@ def agregar_sucursal(nombre_sucursal: str, id_ciudad: int, direccion: Optional[s
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/sucursal/{id_sucursal}")
+@app.put("/sucursalput/{id_sucursal}")
 def actualizar_sucursal(id_sucursal: int, nombre_sucursal: str, id_ciudad: int, direccion: Optional[str] = None):
     try:
         cone = get_conexion()
@@ -209,7 +208,7 @@ def actualizar_sucursal(id_sucursal: int, nombre_sucursal: str, id_ciudad: int, 
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/sucursal/{id_sucursal}")
+@app.delete("/sucursaldelete/{id_sucursal}")
 def eliminar_sucursal(id_sucursal: int):
     try:
         cone = get_conexion()
@@ -227,7 +226,7 @@ def eliminar_sucursal(id_sucursal: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/sucursal/{id_sucursal}")
+@app.patch("/sucursalpatch/{id_sucursal}")
 def actualizar_parcial_sucursal(id_sucursal: int, nombre_sucursal: Optional[str] = None, direccion: Optional[str] = None, id_ciudad: Optional[int] = None):
     try:
         if not nombre_sucursal and not direccion and not id_ciudad:
@@ -265,7 +264,7 @@ def actualizar_parcial_sucursal(id_sucursal: int, nombre_sucursal: Optional[str]
 
 # CRUD empleado
 
-@app.get("/empleado")
+@app.get("/empleadoget")
 def listar_empleado():
     try:
         cone = get_conexion()
@@ -287,7 +286,7 @@ def listar_empleado():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/empleado/{id_empleado}")
+@app.get("/empleadogetid/{id_empleado}")
 def obtener_empleado(id_empleado: int):
     try:
         cone = get_conexion()
@@ -311,14 +310,13 @@ def obtener_empleado(id_empleado: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/empleado")
+@app.post("/empleadopost")
 def agregar_empleado(id_empleado: int, p_nombre: str, s_nombre: Optional[str], p_apellido: str, s_apellido: Optional[str], salario: float):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO empleado 
-            (id_empleado, p_nombre, s_nombre, p_apellido, s_apellido, salario)
+            INSERT INTO empleado
             VALUES(:id_empleado, :p_nombre, :s_nombre, :p_apellido, :s_apellido, :salario)
         """, {
             "id_empleado": id_empleado,
@@ -335,7 +333,7 @@ def agregar_empleado(id_empleado: int, p_nombre: str, s_nombre: Optional[str], p
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/empleado/{id_empleado}")
+@app.put("/empleadoput/{id_empleado}")
 def actualizar_empleado(id_empleado: int, p_nombre: str, s_nombre: Optional[str], p_apellido: str, s_apellido: Optional[str], salario: float):
     try:
         cone = get_conexion()
@@ -364,7 +362,7 @@ def actualizar_empleado(id_empleado: int, p_nombre: str, s_nombre: Optional[str]
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/empleado/{id_empleado}")
+@app.delete("/empleadodelete/{id_empleado}")
 def eliminar_empleado(id_empleado: int):
     try:
         cone = get_conexion()
@@ -382,7 +380,7 @@ def eliminar_empleado(id_empleado: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/empleado/{id_empleado}")
+@app.patch("/empleadopatch/{id_empleado}")
 def actualizar_parcial_empleado(id_empleado: int, p_nombre: Optional[str], s_nombre: Optional[str], p_apellido: Optional[str], s_apellido: Optional[str], salario: Optional[float]):
     try:
         if not p_nombre and not s_nombre and not p_apellido and not s_apellido and not salario:
@@ -426,7 +424,7 @@ def actualizar_parcial_empleado(id_empleado: int, p_nombre: Optional[str], s_nom
 
 # CRUD Cargo
 
-@app.get("/cargos")
+@app.get("/cargosget")
 def listar_cargos():
     try:
         cone = get_conexion()
@@ -441,7 +439,7 @@ def listar_cargos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/cargos/{id_cargo}")
+@app.get("/cargosgetid/{id_cargo}")
 def obtener_cargo(id_cargo: int):
     try:
         cone = get_conexion()
@@ -458,7 +456,7 @@ def obtener_cargo(id_cargo: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/cargos")
+@app.post("/cargospost")
 def agregar_cargo(id_cargo: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -471,7 +469,7 @@ def agregar_cargo(id_cargo: int, descripcion: str):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/cargos/{id_cargo}")
+@app.put("/cargosput/{id_cargo}")
 def actualizar_cargo(id_cargo: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -489,7 +487,7 @@ def actualizar_cargo(id_cargo: int, descripcion: str):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/cargos/{id_cargo}")
+@app.delete("/cargosdelete/{id_cargo}")
 def eliminar_cargo(id_cargo: int):
     try:
         cone = get_conexion()
@@ -507,7 +505,7 @@ def eliminar_cargo(id_cargo: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/cargos/{id_cargo}")
+@app.patch("/cargospatch/{id_cargo}")
 def actualizar_parcial_cargo(id_cargo: int, descripcion: Optional[str]):
     try:
         if not descripcion:
@@ -539,7 +537,7 @@ def actualizar_parcial_cargo(id_cargo: int, descripcion: Optional[str]):
 
 # CRUD Clientes
 
-@app.get("/clientes")
+@app.get("/clientesget")
 def listar_clientes():
     try:
         cone = get_conexion()
@@ -554,7 +552,7 @@ def listar_clientes():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/clientes/{id_cliente}")
+@app.get("/clientesgetid/{id_cliente}")
 def obtener_cliente(id_cliente: int):
     try:
         cone = get_conexion()
@@ -571,12 +569,12 @@ def obtener_cliente(id_cliente: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/clientes")
+@app.post("/clientespost")
 def agregar_cliente(id_cliente: int, rut: str, p_nombre: str, s_nombre: Optional[str], p_apellido: str, s_apellido: Optional[str], correo: Optional[str], telefono: Optional[str]):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
-        cursor.execute("INSERT INTO cliente (id_cliente, rut, p_nombre, s_nombre, p_apellido, s_apellido, correo, telefono) VALUES (:id_cliente, :rut, :p_nombre, :s_nombre, :p_apellido, :s_apellido, :correo, :telefono)", 
+        cursor.execute("INSERT INTO cliente VALUES (:id_cliente, :rut, :p_nombre, :s_nombre, :p_apellido, :s_apellido, :correo, :telefono)", 
                        {"id_cliente": id_cliente, "rut": rut, "p_nombre": p_nombre, "s_nombre": s_nombre, "p_apellido": p_apellido, "s_apellido": s_apellido, "correo": correo, "telefono": telefono})
         cone.commit()
         cursor.close()
@@ -585,7 +583,7 @@ def agregar_cliente(id_cliente: int, rut: str, p_nombre: str, s_nombre: Optional
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/clientes/{id_cliente}")
+@app.put("/clientesput/{id_cliente}")
 def actualizar_cliente(id_cliente: int, rut: str, p_nombre: str, s_nombre: Optional[str], p_apellido: str, s_apellido: Optional[str], correo: Optional[str], telefono: Optional[str]):
     try:
         cone = get_conexion()
@@ -607,7 +605,7 @@ def actualizar_cliente(id_cliente: int, rut: str, p_nombre: str, s_nombre: Optio
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/clientes/{id_cliente}")
+@app.delete("/clientesdelete/{id_cliente}")
 def eliminar_cliente(id_cliente: int):
     try:
         cone = get_conexion()
@@ -625,7 +623,7 @@ def eliminar_cliente(id_cliente: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/clientes/{id_cliente}")
+@app.patch("/clientespatch/{id_cliente}")
 def actualizar_parcial_cliente(id_cliente: int, rut: Optional[str], p_nombre: Optional[str], s_nombre: Optional[str], p_apellido: Optional[str], s_apellido: Optional[str], correo: Optional[str], telefono: Optional[str]):
     try:
         if not (rut or p_nombre or s_nombre or p_apellido or s_apellido or correo or telefono):
@@ -675,7 +673,7 @@ def actualizar_parcial_cliente(id_cliente: int, rut: Optional[str], p_nombre: Op
 
 # CRUD categoria
 
-@app.get("/categorias")
+@app.get("/categoriasget")
 def obtener_categorias():
     try:
         cone = get_conexion()
@@ -693,7 +691,7 @@ def obtener_categorias():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/categorias/{id_categoria}")
+@app.get("/categoriasgetid/{id_categoria}")
 def obtener_categoria(id_categoria: int):
     try:
         cone = get_conexion()
@@ -710,13 +708,13 @@ def obtener_categoria(id_categoria: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/categorias")
+@app.post("/categoriaspost")
 def agregar_categoria(descripcion: str):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO categoria (descripcion) 
+            INSERT INTO categoria
             VALUES (:descripcion)
         """, {"descripcion": descripcion})
         cone.commit()
@@ -726,7 +724,7 @@ def agregar_categoria(descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/categorias/{id_categoria}")
+@app.put("/categoriasput/{id_categoria}")
 def actualizar_categoria(id_categoria: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -749,7 +747,7 @@ def actualizar_categoria(id_categoria: int, descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/categorias/{id_categoria}")
+@app.delete("/categoriasdelete/{id_categoria}")
 def eliminar_categoria(id_categoria: int):
     try:
         cone = get_conexion()
@@ -770,7 +768,7 @@ def eliminar_categoria(id_categoria: int):
 
 # CRUD productos
 
-@app.get("/productos")
+@app.get("/productosget")
 def obtener_productos():
     try:
         cone = get_conexion()
@@ -789,7 +787,7 @@ def obtener_productos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/productos/{id_producto}")
+@app.get("/productosgetid/{id_producto}")
 def obtener_producto(id_producto: int):
     try:
         cone = get_conexion()
@@ -806,13 +804,13 @@ def obtener_producto(id_producto: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/productos")
+@app.post("/productospost")
 def agregar_producto(nombre: str, precio: float, stock: int, id_categoria: int):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO productos (nombre, precio, stock, id_categoria) 
+            INSERT INTO productos
             VALUES (:nombre, :precio, :stock, :id_categoria)
         """, {"nombre": nombre, "precio": precio, "stock": stock, "id_categoria": id_categoria})
         cone.commit()
@@ -822,7 +820,7 @@ def agregar_producto(nombre: str, precio: float, stock: int, id_categoria: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/productos/{id_producto}")
+@app.put("/productosput/{id_producto}")
 def actualizar_producto(id_producto: int, nombre: str, precio: float, stock: int, id_categoria: int):
     try:
         cone = get_conexion()
@@ -845,7 +843,7 @@ def actualizar_producto(id_producto: int, nombre: str, precio: float, stock: int
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/productos/{id_producto}")
+@app.delete("/productosdelete/{id_producto}")
 def eliminar_producto(id_producto: int):
     try:
         cone = get_conexion()
@@ -866,7 +864,7 @@ def eliminar_producto(id_producto: int):
 
 # CRUD inventario
 
-@app.get("/inventarios")
+@app.get("/inventariosget")
 def obtener_inventarios():
     try:
         cone = get_conexion()
@@ -885,7 +883,7 @@ def obtener_inventarios():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/inventarios/{id_inventario}")
+@app.get("/inventariosgetid/{id_inventario}")
 def obtener_inventario(id_inventario: int):
     try:
         cone = get_conexion()
@@ -902,13 +900,13 @@ def obtener_inventario(id_inventario: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/inventarios")
+@app.post("/inventariospost")
 def agregar_inventario(fecha_actualizacion: str, id_sucursal: int):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO inventario (fecha_actualizacion, id_sucursal) 
+            INSERT INTO inventario
             VALUES (:fecha_actualizacion, :id_sucursal)
         """, {"fecha_actualizacion": fecha_actualizacion, "id_sucursal": id_sucursal})
         cone.commit()
@@ -918,7 +916,7 @@ def agregar_inventario(fecha_actualizacion: str, id_sucursal: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/inventarios/{id_inventario}")
+@app.put("/inventariosput/{id_inventario}")
 def actualizar_inventario(id_inventario: int, fecha_actualizacion: str, id_sucursal: int):
     try:
         cone = get_conexion()
@@ -941,7 +939,7 @@ def actualizar_inventario(id_inventario: int, fecha_actualizacion: str, id_sucur
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/inventarios/{id_inventario}")
+@app.delete("/inventariosdelete/{id_inventario}")
 def eliminar_inventario(id_inventario: int):
     try:
         cone = get_conexion()
@@ -962,7 +960,7 @@ def eliminar_inventario(id_inventario: int):
 
 # CRUD pedido
 
-@app.get("/pedidos")
+@app.get("/pedidosget")
 def obtener_pedidos():
     try:
         cone = get_conexion()
@@ -982,7 +980,7 @@ def obtener_pedidos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/pedidos/{id_pedido}")
+@app.get("/pedidosgetid/{id_pedido}")
 def obtener_pedido(id_pedido: int):
     try:
         cone = get_conexion()
@@ -999,13 +997,13 @@ def obtener_pedido(id_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/pedidos")
+@app.post("/pedidospost")
 def agregar_pedido(cliente_id: int, fecha_pedido: str, id_empleado: int, total: float):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO pedido (fecha_pedido, id_cliente, id_empleado, total) 
+            INSERT INTO pedido
             VALUES (:fecha_pedido, :cliente_id, :id_empleado, :total)
         """, {"fecha_pedido": fecha_pedido, "cliente_id": cliente_id, "id_empleado": id_empleado, "total": total})
         cone.commit()
@@ -1015,7 +1013,7 @@ def agregar_pedido(cliente_id: int, fecha_pedido: str, id_empleado: int, total: 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/pedidos/{id_pedido}")
+@app.put("/pedidosput/{id_pedido}")
 def actualizar_pedido(id_pedido: int, cliente_id: int, fecha_pedido: str, id_empleado: int, total: float):
     try:
         cone = get_conexion()
@@ -1038,7 +1036,7 @@ def actualizar_pedido(id_pedido: int, cliente_id: int, fecha_pedido: str, id_emp
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/pedidos/{id_pedido}")
+@app.delete("/pedidosdelete/{id_pedido}")
 def eliminar_pedido(id_pedido: int):
     try:
         cone = get_conexion()
@@ -1059,7 +1057,7 @@ def eliminar_pedido(id_pedido: int):
 
 # CRUD estado_pedido
 
-@app.get("/estados_pedido")
+@app.get("/estados_pedidoget")
 def obtener_estados_pedido():
     try:
         cone = get_conexion()
@@ -1077,7 +1075,7 @@ def obtener_estados_pedido():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/estados_pedido/{id_estado_pedido}")
+@app.get("/estados_pedidogetid/{id_estado_pedido}")
 def obtener_estado_pedido(id_estado_pedido: int):
     try:
         cone = get_conexion()
@@ -1094,13 +1092,13 @@ def obtener_estado_pedido(id_estado_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/estados_pedido")
+@app.post("/estados_pedidopost")
 def agregar_estado_pedido(descripcion: str):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO estado_pedido (descripcion) 
+            INSERT INTO estado_pedido
             VALUES (:descripcion)
         """, {"descripcion": descripcion})
         cone.commit()
@@ -1110,7 +1108,7 @@ def agregar_estado_pedido(descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/estados_pedido/{id_estado_pedido}")
+@app.put("/estados_pedidoput/{id_estado_pedido}")
 def actualizar_estado_pedido(id_estado_pedido: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -1133,7 +1131,7 @@ def actualizar_estado_pedido(id_estado_pedido: int, descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/estados_pedido/{id_estado_pedido}")
+@app.delete("/estados_pedidodelete/{id_estado_pedido}")
 def eliminar_estado_pedido(id_estado_pedido: int):
     try:
         cone = get_conexion()
@@ -1154,7 +1152,7 @@ def eliminar_estado_pedido(id_estado_pedido: int):
 
 # CRUD detalle_pedido
 
-@app.get("/detalle_pedidos")
+@app.get("/detalle_pedidosget")
 def obtener_detalle_pedidos():
     try:
         cone = get_conexion()
@@ -1175,7 +1173,7 @@ def obtener_detalle_pedidos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/detalle_pedidos/{id_detalle_pedido}")
+@app.get("/detalle_pedidosgetid/{id_detalle_pedido}")
 def obtener_detalle_pedido(id_detalle_pedido: int):
     try:
         cone = get_conexion()
@@ -1198,13 +1196,13 @@ def obtener_detalle_pedido(id_detalle_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/detalle_pedidos")
+@app.post("/detalle_pedidospost")
 def agregar_detalle_pedido(id_pedido: int, id_producto: int, cantidad: int, subtotal: float):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO detalle_pedido (id_pedido, id_producto, cantidad, subtotal) 
+            INSERT INTO detalle_pedido
             VALUES (:id_pedido, :id_producto, :cantidad, :subtotal)
         """, {"id_pedido": id_pedido, "id_producto": id_producto, "cantidad": cantidad, "subtotal": subtotal})
         cone.commit()
@@ -1214,7 +1212,7 @@ def agregar_detalle_pedido(id_pedido: int, id_producto: int, cantidad: int, subt
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/detalle_pedidos/{id_detalle_pedido}")
+@app.put("/detalle_pedidosput/{id_detalle_pedido}")
 def actualizar_detalle_pedido(id_detalle_pedido: int, id_pedido: int, id_producto: int, cantidad: int, subtotal: float):
     try:
         cone = get_conexion()
@@ -1237,7 +1235,7 @@ def actualizar_detalle_pedido(id_detalle_pedido: int, id_pedido: int, id_product
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/detalle_pedidos/{id_detalle_pedido}")
+@app.delete("/detalle_pedidosdelete/{id_detalle_pedido}")
 def eliminar_detalle_pedido(id_detalle_pedido: int):
     try:
         cone = get_conexion()
@@ -1258,7 +1256,7 @@ def eliminar_detalle_pedido(id_detalle_pedido: int):
 
 # CRUD factura
 
-@app.get("/facturas")
+@app.get("/facturasget")
 def obtener_facturas():
     try:
         cone = get_conexion()
@@ -1277,7 +1275,7 @@ def obtener_facturas():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/facturas/{id_factura}")
+@app.get("/facturasgetid/{id_factura}")
 def obtener_factura(id_factura: int):
     try:
         cone = get_conexion()
@@ -1298,13 +1296,13 @@ def obtener_factura(id_factura: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/facturas")
+@app.post("/facturaspost")
 def agregar_factura(id_pedido: int, fecha_emision: str, total: float):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO factura (id_pedido, fecha_emision, total) 
+            INSERT INTO factura
             VALUES (:id_pedido, :fecha_emision, :total)
         """, {"id_pedido": id_pedido, "fecha_emision": fecha_emision, "total": total})
         cone.commit()
@@ -1314,7 +1312,7 @@ def agregar_factura(id_pedido: int, fecha_emision: str, total: float):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/facturas/{id_factura}")
+@app.put("/facturasput/{id_factura}")
 def actualizar_factura(id_factura: int, id_pedido: int, fecha_emision: str, total: float):
     try:
         cone = get_conexion()
@@ -1337,7 +1335,7 @@ def actualizar_factura(id_factura: int, id_pedido: int, fecha_emision: str, tota
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/facturas/{id_factura}")
+@app.delete("/facturasdelete/{id_factura}")
 def eliminar_factura(id_factura: int):
     try:
         cone = get_conexion()
@@ -1358,7 +1356,7 @@ def eliminar_factura(id_factura: int):
 
 # CRUD tipo_transaccion
 
-@app.get("/tipos_transaccion")
+@app.get("/tipos_transaccionget")
 def obtener_tipos_transaccion():
     try:
         cone = get_conexion()
@@ -1376,7 +1374,7 @@ def obtener_tipos_transaccion():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/tipos_transaccion/{id_tipo_transaccion}")
+@app.get("/tipos_transacciongetid/{id_tipo_transaccion}")
 def obtener_tipo_transaccion(id_tipo_transaccion: int):
     try:
         cone = get_conexion()
@@ -1396,13 +1394,13 @@ def obtener_tipo_transaccion(id_tipo_transaccion: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/tipos_transaccion")
+@app.post("/tipos_transaccionpost")
 def agregar_tipo_transaccion(descripcion: str):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO tipo_transaccion (descripcion) 
+            INSERT INTO tipo_transaccion
             VALUES (:descripcion)
         """, {"descripcion": descripcion})
         cone.commit()
@@ -1412,7 +1410,7 @@ def agregar_tipo_transaccion(descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/tipos_transaccion/{id_tipo_transaccion}")
+@app.put("/tipos_transaccionput/{id_tipo_transaccion}")
 def actualizar_tipo_transaccion(id_tipo_transaccion: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -1435,7 +1433,7 @@ def actualizar_tipo_transaccion(id_tipo_transaccion: int, descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/tipos_transaccion/{id_tipo_transaccion}")
+@app.delete("/tipos_transacciondelete/{id_tipo_transaccion}")
 def eliminar_tipo_transaccion(id_tipo_transaccion: int):
     try:
         cone = get_conexion()
@@ -1456,7 +1454,7 @@ def eliminar_tipo_transaccion(id_tipo_transaccion: int):
 
 # CRUD reporte_ventas
 
-@app.get("/reportes_ventas")
+@app.get("/reportes_ventasget")
 def obtener_reportes_ventas():
     try:
         cone = get_conexion()
@@ -1475,7 +1473,7 @@ def obtener_reportes_ventas():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/reportes_ventas/{id_reportes}")
+@app.get("/reportes_ventasgetid/{id_reportes}")
 def obtener_reporte_ventas(id_reportes: int):
     try:
         cone = get_conexion()
@@ -1496,13 +1494,13 @@ def obtener_reporte_ventas(id_reportes: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/reportes_ventas")
+@app.post("/reportes_ventaspost")
 def agregar_reporte_ventas(fecha_generacion: str, total_ventas: float):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO reporte_ventas (fecha_generacion, total_ventas)
+            INSERT INTO reporte_ventas
             VALUES (:fecha_generacion, :total_ventas)
         """, {"fecha_generacion": fecha_generacion, "total_ventas": total_ventas})
         cone.commit()
@@ -1512,7 +1510,7 @@ def agregar_reporte_ventas(fecha_generacion: str, total_ventas: float):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/reportes_ventas/{id_reportes}")
+@app.put("/reportes_ventasput/{id_reportes}")
 def actualizar_reporte_ventas(id_reportes: int, fecha_generacion: str, total_ventas: float):
     try:
         cone = get_conexion()
@@ -1535,7 +1533,7 @@ def actualizar_reporte_ventas(id_reportes: int, fecha_generacion: str, total_ven
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/reportes_ventas/{id_reportes}")
+@app.delete("/reportes_ventasdelete/{id_reportes}")
 def eliminar_reporte_ventas(id_reportes: int):
     try:
         cone = get_conexion()
@@ -1556,7 +1554,7 @@ def eliminar_reporte_ventas(id_reportes: int):
 
 # CRUD reporte_desempenio
 
-@app.get("/reportes_desempenio")
+@app.get("/reportes_desempenioget")
 def obtener_reportes_desempenio():
     try:
         cone = get_conexion()
@@ -1575,7 +1573,7 @@ def obtener_reportes_desempenio():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/reportes_desempenio/{id_reporte_desempenio}")
+@app.get("/reportes_desempeniogetid/{id_reporte_desempenio}")
 def obtener_reporte_desempenio(id_reporte_desempenio: int):
     try:
         cone = get_conexion()
@@ -1596,13 +1594,13 @@ def obtener_reporte_desempenio(id_reporte_desempenio: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/reportes_desempenio")
+@app.post("/reportes_desempeniopost")
 def agregar_reporte_desempenio(fecha_generacion: str, datos_evaluacion: str):
     try:
         cone = get_conexion()
         cursor = cone.cursor()
         cursor.execute("""
-            INSERT INTO reporte_desempenio (fecha_generacion, datos_evaluacion)
+            INSERT INTO reporte_desempenio
             VALUES (:fecha_generacion, :datos_evaluacion)
         """, {"fecha_generacion": fecha_generacion, "datos_evaluacion": datos_evaluacion})
         cone.commit()
@@ -1612,7 +1610,7 @@ def agregar_reporte_desempenio(fecha_generacion: str, datos_evaluacion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/reportes_desempenio/{id_reporte_desempenio}")
+@app.put("/reportes_desempenioput/{id_reporte_desempenio}")
 def actualizar_reporte_desempenio(id_reporte_desempenio: int, fecha_generacion: str, datos_evaluacion: str):
     try:
         cone = get_conexion()
@@ -1635,7 +1633,7 @@ def actualizar_reporte_desempenio(id_reporte_desempenio: int, fecha_generacion: 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/reportes_desempenio/{id_reporte_desempenio}")
+@app.delete("/reportes_desempeniodelete/{id_reporte_desempenio}")
 def eliminar_reporte_desempenio(id_reporte_desempenio: int):
     try:
         cone = get_conexion()
