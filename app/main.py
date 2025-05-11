@@ -766,6 +766,24 @@ def eliminar_categoria(id_categoria: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.patch("/categorias/{id_categoria}")
+def actualizar_parcial_categoria(id_categoria: int, descripcion: Optional[str] = None):
+    try:
+        if not descripcion:
+            raise HTTPException(status_code=400, detail="Debe enviar al menos un dato")
+        cone = get_conexion()
+        cursor = cone.cursor()
+        cursor.execute("UPDATE categoria SET descripcion = :descripcion WHERE id_categoria = :id_categoria",
+                       {"id_categoria": id_categoria, "descripcion": descripcion})
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Categoría no encontrada")
+        cone.commit()
+        cursor.close()
+        cone.close()
+        return {"Mensaje": "Categoría actualizada parcialmente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # CRUD productos
 
 @app.get("/productosget")
@@ -862,6 +880,39 @@ def eliminar_producto(id_producto: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.patch("/productos/{id_producto}")
+def actualizar_parcial_producto(id_producto: int, nombre: Optional[str] = None, precio: Optional[float] = None,
+                                 stock: Optional[int] = None, id_categoria: Optional[int] = None):
+    try:
+        if not any([nombre, precio, stock, id_categoria]):
+            raise HTTPException(status_code=400, detail="Debe enviar al menos un dato")
+        cone = get_conexion()
+        cursor = cone.cursor()
+        campos = []
+        valores = {"id_producto": id_producto}
+        if nombre:
+            campos.append("nombre = :nombre")
+            valores["nombre"] = nombre
+        if precio:
+            campos.append("precio = :precio")
+            valores["precio"] = precio
+        if stock:
+            campos.append("stock = :stock")
+            valores["stock"] = stock
+        if id_categoria:
+            campos.append("id_categoria = :id_categoria")
+            valores["id_categoria"] = id_categoria
+        query = f"UPDATE productos SET {', '.join(campos)} WHERE id_producto = :id_producto"
+        cursor.execute(query, valores)
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Producto no encontrado")
+        cone.commit()
+        cursor.close()
+        cone.close()
+        return {"Mensaje": "Producto actualizado parcialmente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # CRUD inventario
 
 @app.get("/inventariosget")
@@ -955,6 +1006,33 @@ def eliminar_inventario(id_inventario: int):
         cursor.close()
         cone.close()
         return {"Mensaje": "Inventario eliminado con éxito"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.patch("/inventarios/{id_inventario}")
+def actualizar_parcial_inventario(id_inventario: int, fecha_actualizacion: Optional[str] = None,
+                                  id_sucursal: Optional[int] = None):
+    try:
+        if not any([fecha_actualizacion, id_sucursal]):
+            raise HTTPException(status_code=400, detail="Debe enviar al menos un dato")
+        cone = get_conexion()
+        cursor = cone.cursor()
+        campos = []
+        valores = {"id_inventario": id_inventario}
+        if fecha_actualizacion:
+            campos.append("fecha_actualizacion = :fecha_actualizacion")
+            valores["fecha_actualizacion"] = fecha_actualizacion
+        if id_sucursal:
+            campos.append("id_sucursal = :id_sucursal")
+            valores["id_sucursal"] = id_sucursal
+        query = f"UPDATE inventario SET {', '.join(campos)} WHERE id_inventario = :id_inventario"
+        cursor.execute(query, valores)
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Inventario no encontrado")
+        cone.commit()
+        cursor.close()
+        cone.close()
+        return {"Mensaje": "Inventario actualizado parcialmente"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1055,6 +1133,36 @@ def eliminar_pedido(id_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.patch("/pedidos/{id_pedido}")
+def actualizar_parcial_pedido(id_pedido: int, fecha_pedido: Optional[str] = None,
+                               id_cliente: Optional[int] = None, id_empleado: Optional[int] = None):
+    try:
+        if not any([fecha_pedido, id_cliente, id_empleado]):
+            raise HTTPException(status_code=400, detail="Debe enviar al menos un dato")
+        cone = get_conexion()
+        cursor = cone.cursor()
+        campos = []
+        valores = {"id_pedido": id_pedido}
+        if fecha_pedido:
+            campos.append("fecha_pedido = :fecha_pedido")
+            valores["fecha_pedido"] = fecha_pedido
+        if id_cliente:
+            campos.append("id_cliente = :id_cliente")
+            valores["id_cliente"] = id_cliente
+        if id_empleado:
+            campos.append("id_empleado = :id_empleado")
+            valores["id_empleado"] = id_empleado
+        query = f"UPDATE pedido SET {', '.join(campos)} WHERE id_pedido = :id_pedido"
+        cursor.execute(query, valores)
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Pedido no encontrado")
+        cone.commit()
+        cursor.close()
+        cone.close()
+        return {"Mensaje": "Pedido actualizado parcialmente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # CRUD estado_pedido
 
 @app.get("/estados_pedidoget")
@@ -1147,6 +1255,24 @@ def eliminar_estado_pedido(id_estado_pedido: int):
         cursor.close()
         cone.close()
         return {"Mensaje": "Estado de pedido eliminado con éxito"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.patch("/estados_pedido/{id_estado_pedido}")
+def actualizar_parcial_estado_pedido(id_estado_pedido: int, descripcion: Optional[str] = None):
+    try:
+        if not descripcion:
+            raise HTTPException(status_code=400, detail="Debe enviar al menos un dato")
+        cone = get_conexion()
+        cursor = cone.cursor()
+        cursor.execute("UPDATE estado_pedido SET descripcion = :descripcion WHERE id_estado_pedido = :id_estado_pedido",
+                       {"id_estado_pedido": id_estado_pedido, "descripcion": descripcion})
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Estado de pedido no encontrado")
+        cone.commit()
+        cursor.close()
+        cone.close()
+        return {"Mensaje": "Estado de pedido actualizado parcialmente"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1251,6 +1377,40 @@ def eliminar_detalle_pedido(id_detalle_pedido: int):
         cursor.close()
         cone.close()
         return {"Mensaje": "Detalle de pedido eliminado con éxito"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.patch("/detalle_pedidos/{id_detalle_pedido}")
+def actualizar_parcial_detalle_pedido(id_detalle_pedido: int, id_pedido: Optional[int] = None,
+                                      id_producto: Optional[int] = None, cantidad: Optional[int] = None,
+                                      subtotal: Optional[float] = None):
+    try:
+        if not any([id_pedido, id_producto, cantidad, subtotal]):
+            raise HTTPException(status_code=400, detail="Debe enviar al menos un dato")
+        cone = get_conexion()
+        cursor = cone.cursor()
+        campos = []
+        valores = {"id_detalle_pedido": id_detalle_pedido}
+        if id_pedido:
+            campos.append("id_pedido = :id_pedido")
+            valores["id_pedido"] = id_pedido
+        if id_producto:
+            campos.append("id_producto = :id_producto")
+            valores["id_producto"] = id_producto
+        if cantidad:
+            campos.append("cantidad = :cantidad")
+            valores["cantidad"] = cantidad
+        if subtotal:
+            campos.append("subtotal = :subtotal")
+            valores["subtotal"] = subtotal
+        query = f"UPDATE detalle_pedido SET {', '.join(campos)} WHERE id_detalle_pedido = :id_detalle_pedido"
+        cursor.execute(query, valores)
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Detalle de pedido no encontrado")
+        cone.commit()
+        cursor.close()
+        cone.close()
+        return {"Mensaje": "Detalle de pedido actualizado parcialmente"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -1452,6 +1612,24 @@ def eliminar_tipo_transaccion(id_tipo_transaccion: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.patch("/tipos_transaccion/{id_tipo_transaccion}")
+def actualizar_parcial_tipo_transaccion(id_tipo_transaccion: int, descripcion: Optional[str] = None):
+    try:
+        if not descripcion:
+            raise HTTPException(status_code=400, detail="Debe enviar al menos un dato")
+        cone = get_conexion()
+        cursor = cone.cursor()
+        cursor.execute("UPDATE tipo_transaccion SET descripcion = :descripcion WHERE id_tipo_transaccion = :id_tipo_transaccion",
+                       {"id_tipo_transaccion": id_tipo_transaccion, "descripcion": descripcion})
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Tipo de transacción no encontrado")
+        cone.commit()
+        cursor.close()
+        cone.close()
+        return {"Mensaje": "Tipo de transacción actualizado parcialmente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # CRUD reporte_ventas
 
 @app.get("/reportes_ventasget")
@@ -1552,6 +1730,33 @@ def eliminar_reporte_ventas(id_reportes: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.patch("/reportes_ventas/{id_reportes}")
+def actualizar_parcial_reporte_ventas(id_reportes: int, fecha_generacion: Optional[str] = None,
+                                      total_ventas: Optional[float] = None):
+    try:
+        if not any([fecha_generacion, total_ventas]):
+            raise HTTPException(status_code=400, detail="Debe enviar al menos un dato")
+        cone = get_conexion()
+        cursor = cone.cursor()
+        campos = []
+        valores = {"id_reportes": id_reportes}
+        if fecha_generacion:
+            campos.append("fecha_generacion = :fecha_generacion")
+            valores["fecha_generacion"] = fecha_generacion
+        if total_ventas:
+            campos.append("total_ventas = :total_ventas")
+            valores["total_ventas"] = total_ventas
+        query = f"UPDATE reporte_ventas SET {', '.join(campos)} WHERE id_reportes = :id_reportes"
+        cursor.execute(query, valores)
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Reporte de ventas no encontrado")
+        cone.commit()
+        cursor.close()
+        cone.close()
+        return {"Mensaje": "Reporte de ventas actualizado parcialmente"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
 # CRUD reporte_desempenio
 
 @app.get("/reportes_desempenioget")
@@ -1649,5 +1854,32 @@ def eliminar_reporte_desempenio(id_reporte_desempenio: int):
         cursor.close()
         cone.close()
         return {"Mensaje": "Reporte de desempeño eliminado con éxito"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.patch("/reportes_desempenio/{id_reporte_desempenio}")
+def actualizar_parcial_reporte_desempenio(id_reporte_desempenio: int, fecha_generacion: Optional[str] = None,
+                                          datos_evaluacion: Optional[str] = None):
+    try:
+        if not any([fecha_generacion, datos_evaluacion]):
+            raise HTTPException(status_code=400, detail="Debe enviar al menos un dato")
+        cone = get_conexion()
+        cursor = cone.cursor()
+        campos = []
+        valores = {"id_reporte_desempenio": id_reporte_desempenio}
+        if fecha_generacion:
+            campos.append("fecha_generacion = :fecha_generacion")
+            valores["fecha_generacion"] = fecha_generacion
+        if datos_evaluacion:
+            campos.append("datos_evaluacion = :datos_evaluacion")
+            valores["datos_evaluacion"] = datos_evaluacion
+        query = f"UPDATE reporte_desempenio SET {', '.join(campos)} WHERE id_reporte_desempenio = :id_reporte_desempenio"
+        cursor.execute(query, valores)
+        if cursor.rowcount == 0:
+            raise HTTPException(status_code=404, detail="Reporte de desempeño no encontrado")
+        cone.commit()
+        cursor.close()
+        cone.close()
+        return {"Mensaje": "Reporte de desempeño actualizado parcialmente"}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

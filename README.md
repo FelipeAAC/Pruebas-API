@@ -10,3 +10,8 @@ Esta es una api creada para testeo del proyecto semestral de integración, posib
 ```bash
 git clone URL
 ```
+## Pasos a usar:
+
+1. source venv/Script/activate
+2. pip install -r requirements.txt
+3. uvicorn app.main:app --reload --port 8001 (Elegir el puerto)
