@@ -251,3 +251,4 @@ INSERT INTO reporte_ventas VALUES (1, TO_DATE('2024-06-08', 'YYYY-MM-DD'), 21000
 -- Reportes de desempeño
 INSERT INTO reporte_desempenio VALUES (1, TO_DATE('2024-06-08', 'YYYY-MM-DD'), 'Evaluación semanal: ventas altas, cumplimiento 95%');
 
+COMMIT;

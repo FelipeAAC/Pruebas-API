@@ -5,6 +5,7 @@ from typing import Optional
 app = FastAPI()
 
 #Conexión con OracleDB
+
 def get_conexion():
     conexion = oracledb.connect(
         user="prueba_api",
@@ -12,7 +13,16 @@ def get_conexion():
         dsn="localhost:1521/orcl"
     )
     return conexion
-
+"""
+#Conexión con OracleDB Duoc
+def get_conexion():
+    conexion = oracledb.connect(
+        user="prueba_api",
+        password="prueba_api",
+        dsn="localhost:1521/orcl.duoc.com.cl"
+    )
+    return conexion
+"""
 # CRUD Ciudad
 
 @app.get("/ciudadget")
