@@ -2,7 +2,70 @@ from fastapi import FastAPI, HTTPException, Header
 import oracledb
 from typing import Optional
 
-app = FastAPI()
+tags_metadata = [
+    {
+        "Nombre": "Ciudad",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Sucursal",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Empleado",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Cargo",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Cliente",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Categoría",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Productos",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Inventario",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Pedidos",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Estado Pedido",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Detalle Pedido",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Factura",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Tipo Transacción",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Reporte Venta",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    },
+    {
+        "Nombre": "Reporte Desempeño",
+        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+    }
+]
+
+app = FastAPI(openapi_tags=tags_metadata)
 
 #Conexión con OracleDB
 
@@ -25,7 +88,7 @@ def get_conexion():
 """
 # CRUD Ciudad
 
-@app.get("/ciudadget")
+@app.get("/ciudadget", tags=["Ciudad"])
 def listar_ciudad():
     try:
         cone = get_conexion()
@@ -43,7 +106,7 @@ def listar_ciudad():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/ciudadgetid/{id_ciudad}")
+@app.get("/ciudadgetid/{id_ciudad}", tags=["Ciudad"])
 def obtener_ciudad(id_ciudad: int):
     try:
         cone = get_conexion()
@@ -60,7 +123,7 @@ def obtener_ciudad(id_ciudad: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/ciudadpost")
+@app.post("/ciudadpost", tags=["Ciudad"])
 def agregar_ciudad(id_ciudad: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -76,7 +139,7 @@ def agregar_ciudad(id_ciudad: int, descripcion: str):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/ciudadputid/{id_ciudad}")
+@app.put("/ciudadputid/{id_ciudad}", tags=["Ciudad"])
 def actualizar_ciudad(id_ciudad: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -98,7 +161,7 @@ def actualizar_ciudad(id_ciudad: int, descripcion: str):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/ciudaddelete/{id_ciudad}")
+@app.delete("/ciudaddelete/{id_ciudad}", tags=["Ciudad"])
 def eliminar_ciudad(id_ciudad: int):
     try:
         cone = get_conexion()
@@ -116,7 +179,7 @@ def eliminar_ciudad(id_ciudad: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/ciudadpatch/{id_ciudad}")
+@app.patch("/ciudadpatch/{id_ciudad}", tags=["Ciudad"])
 def actualizar_parcial_ciudad(id_ciudad: int, descripcion: Optional[str] = None):
     try:
         if not descripcion:
@@ -143,7 +206,7 @@ def actualizar_parcial_ciudad(id_ciudad: int, descripcion: Optional[str] = None)
 
 # CRUD Sucursal
 
-@app.get("/sucursalget")
+@app.get("/sucursalget", tags=["Sucursal"])
 def listar_sucursal():
     try:
         cone = get_conexion()
@@ -163,7 +226,7 @@ def listar_sucursal():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/sucursalgetid/{id_sucursal}")
+@app.get("/sucursalgetid/{id_sucursal}", tags=["Sucursal"])
 def obtener_sucursal(id_sucursal: int):
     try:
         cone = get_conexion()
@@ -180,7 +243,7 @@ def obtener_sucursal(id_sucursal: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/sucursalpost")
+@app.post("/sucursalpost", tags=["Sucursal"])
 def agregar_sucursal(nombre_sucursal: str, id_ciudad: int, direccion: Optional[str] = None):
     try:
         cone = get_conexion()
@@ -196,7 +259,7 @@ def agregar_sucursal(nombre_sucursal: str, id_ciudad: int, direccion: Optional[s
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/sucursalput/{id_sucursal}")
+@app.put("/sucursalput/{id_sucursal}", tags=["Sucursal"])
 def actualizar_sucursal(id_sucursal: int, nombre_sucursal: str, id_ciudad: int, direccion: Optional[str] = None):
     try:
         cone = get_conexion()
@@ -218,7 +281,7 @@ def actualizar_sucursal(id_sucursal: int, nombre_sucursal: str, id_ciudad: int, 
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/sucursaldelete/{id_sucursal}")
+@app.delete("/sucursaldelete/{id_sucursal}", tags=["Sucursal"])
 def eliminar_sucursal(id_sucursal: int):
     try:
         cone = get_conexion()
@@ -236,7 +299,7 @@ def eliminar_sucursal(id_sucursal: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/sucursalpatch/{id_sucursal}")
+@app.patch("/sucursalpatch/{id_sucursal}", tags=["Sucursal"])
 def actualizar_parcial_sucursal(id_sucursal: int, nombre_sucursal: Optional[str] = None, direccion: Optional[str] = None, id_ciudad: Optional[int] = None):
     try:
         if not nombre_sucursal and not direccion and not id_ciudad:
@@ -274,7 +337,7 @@ def actualizar_parcial_sucursal(id_sucursal: int, nombre_sucursal: Optional[str]
 
 # CRUD empleado
 
-@app.get("/empleadoget")
+@app.get("/empleadoget", tags=["Empleado"])
 def listar_empleado():
     try:
         cone = get_conexion()
@@ -296,7 +359,7 @@ def listar_empleado():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/empleadogetid/{id_empleado}")
+@app.get("/empleadogetid/{id_empleado}", tags=["Empleado"])
 def obtener_empleado(id_empleado: int):
     try:
         cone = get_conexion()
@@ -320,7 +383,7 @@ def obtener_empleado(id_empleado: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/empleadopost")
+@app.post("/empleadopost", tags=["Empleado"])
 def agregar_empleado(id_empleado: int, p_nombre: str, s_nombre: Optional[str], p_apellido: str, s_apellido: Optional[str], salario: float):
     try:
         cone = get_conexion()
@@ -343,7 +406,7 @@ def agregar_empleado(id_empleado: int, p_nombre: str, s_nombre: Optional[str], p
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/empleadoput/{id_empleado}")
+@app.put("/empleadoput/{id_empleado}", tags=["Empleado"])
 def actualizar_empleado(id_empleado: int, p_nombre: str, s_nombre: Optional[str], p_apellido: str, s_apellido: Optional[str], salario: float):
     try:
         cone = get_conexion()
@@ -372,7 +435,7 @@ def actualizar_empleado(id_empleado: int, p_nombre: str, s_nombre: Optional[str]
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/empleadodelete/{id_empleado}")
+@app.delete("/empleadodelete/{id_empleado}", tags=["Empleado"])
 def eliminar_empleado(id_empleado: int):
     try:
         cone = get_conexion()
@@ -390,7 +453,7 @@ def eliminar_empleado(id_empleado: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/empleadopatch/{id_empleado}")
+@app.patch("/empleadopatch/{id_empleado}", tags=["Empleado"])
 def actualizar_parcial_empleado(id_empleado: int, p_nombre: Optional[str], s_nombre: Optional[str], p_apellido: Optional[str], s_apellido: Optional[str], salario: Optional[float]):
     try:
         if not p_nombre and not s_nombre and not p_apellido and not s_apellido and not salario:
@@ -434,7 +497,7 @@ def actualizar_parcial_empleado(id_empleado: int, p_nombre: Optional[str], s_nom
 
 # CRUD Cargo
 
-@app.get("/cargosget")
+@app.get("/cargosget", tags=["Cargo"])
 def listar_cargos():
     try:
         cone = get_conexion()
@@ -449,7 +512,7 @@ def listar_cargos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/cargosgetid/{id_cargo}")
+@app.get("/cargosgetid/{id_cargo}", tags=["Cargo"])
 def obtener_cargo(id_cargo: int):
     try:
         cone = get_conexion()
@@ -466,7 +529,7 @@ def obtener_cargo(id_cargo: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/cargospost")
+@app.post("/cargospost", tags=["Cargo"])
 def agregar_cargo(id_cargo: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -479,7 +542,7 @@ def agregar_cargo(id_cargo: int, descripcion: str):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/cargosput/{id_cargo}")
+@app.put("/cargosput/{id_cargo}", tags=["Cargo"])
 def actualizar_cargo(id_cargo: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -497,7 +560,7 @@ def actualizar_cargo(id_cargo: int, descripcion: str):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/cargosdelete/{id_cargo}")
+@app.delete("/cargosdelete/{id_cargo}", tags=["Cargo"])
 def eliminar_cargo(id_cargo: int):
     try:
         cone = get_conexion()
@@ -515,7 +578,7 @@ def eliminar_cargo(id_cargo: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/cargospatch/{id_cargo}")
+@app.patch("/cargospatch/{id_cargo}", tags=["Cargo"])
 def actualizar_parcial_cargo(id_cargo: int, descripcion: Optional[str]):
     try:
         if not descripcion:
@@ -547,7 +610,7 @@ def actualizar_parcial_cargo(id_cargo: int, descripcion: Optional[str]):
 
 # CRUD Clientes
 
-@app.get("/clientesget")
+@app.get("/clientesget", tags=["Cliente"])
 def listar_clientes():
     try:
         cone = get_conexion()
@@ -562,7 +625,7 @@ def listar_clientes():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/clientesgetid/{id_cliente}")
+@app.get("/clientesgetid/{id_cliente}", tags=["Cliente"])
 def obtener_cliente(id_cliente: int):
     try:
         cone = get_conexion()
@@ -579,7 +642,7 @@ def obtener_cliente(id_cliente: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.post("/clientespost")
+@app.post("/clientespost", tags=["Cliente"])
 def agregar_cliente(id_cliente: int, rut: str, p_nombre: str, s_nombre: Optional[str], p_apellido: str, s_apellido: Optional[str], correo: Optional[str], telefono: Optional[str]):
     try:
         cone = get_conexion()
@@ -593,7 +656,7 @@ def agregar_cliente(id_cliente: int, rut: str, p_nombre: str, s_nombre: Optional
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.put("/clientesput/{id_cliente}")
+@app.put("/clientesput/{id_cliente}", tags=["Cliente"])
 def actualizar_cliente(id_cliente: int, rut: str, p_nombre: str, s_nombre: Optional[str], p_apellido: str, s_apellido: Optional[str], correo: Optional[str], telefono: Optional[str]):
     try:
         cone = get_conexion()
@@ -615,7 +678,7 @@ def actualizar_cliente(id_cliente: int, rut: str, p_nombre: str, s_nombre: Optio
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.delete("/clientesdelete/{id_cliente}")
+@app.delete("/clientesdelete/{id_cliente}", tags=["Cliente"])
 def eliminar_cliente(id_cliente: int):
     try:
         cone = get_conexion()
@@ -633,7 +696,7 @@ def eliminar_cliente(id_cliente: int):
     except Exception as ex:
         raise HTTPException(status_code=500, detail=str(ex))
 
-@app.patch("/clientespatch/{id_cliente}")
+@app.patch("/clientespatch/{id_cliente}", tags=["Cliente"])
 def actualizar_parcial_cliente(id_cliente: int, rut: Optional[str], p_nombre: Optional[str], s_nombre: Optional[str], p_apellido: Optional[str], s_apellido: Optional[str], correo: Optional[str], telefono: Optional[str]):
     try:
         if not (rut or p_nombre or s_nombre or p_apellido or s_apellido or correo or telefono):
@@ -683,7 +746,7 @@ def actualizar_parcial_cliente(id_cliente: int, rut: Optional[str], p_nombre: Op
 
 # CRUD categoria
 
-@app.get("/categoriasget")
+@app.get("/categoriasget", tags=["Categoría"])
 def obtener_categorias():
     try:
         cone = get_conexion()
@@ -701,7 +764,7 @@ def obtener_categorias():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/categoriasgetid/{id_categoria}")
+@app.get("/categoriasgetid/{id_categoria}", tags=["Categoría"])
 def obtener_categoria(id_categoria: int):
     try:
         cone = get_conexion()
@@ -718,7 +781,7 @@ def obtener_categoria(id_categoria: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/categoriaspost")
+@app.post("/categoriaspost", tags=["Categoría"])
 def agregar_categoria(descripcion: str):
     try:
         cone = get_conexion()
@@ -734,7 +797,7 @@ def agregar_categoria(descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/categoriasput/{id_categoria}")
+@app.put("/categoriasput/{id_categoria}", tags=["Categoría"])
 def actualizar_categoria(id_categoria: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -757,7 +820,7 @@ def actualizar_categoria(id_categoria: int, descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/categoriasdelete/{id_categoria}")
+@app.delete("/categoriasdelete/{id_categoria}", tags=["Categoría"])
 def eliminar_categoria(id_categoria: int):
     try:
         cone = get_conexion()
@@ -776,7 +839,7 @@ def eliminar_categoria(id_categoria: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/categorias/{id_categoria}")
+@app.patch("/categorias/{id_categoria}", tags=["Categoría"])
 def actualizar_parcial_categoria(id_categoria: int, descripcion: Optional[str] = None):
     try:
         if not descripcion:
@@ -796,7 +859,7 @@ def actualizar_parcial_categoria(id_categoria: int, descripcion: Optional[str] =
 
 # CRUD productos
 
-@app.get("/productosget")
+@app.get("/productosget", tags=["Productos"])
 def obtener_productos():
     try:
         cone = get_conexion()
@@ -815,7 +878,7 @@ def obtener_productos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/productosgetid/{id_producto}")
+@app.get("/productosgetid/{id_producto}", tags=["Productos"])
 def obtener_producto(id_producto: int):
     try:
         cone = get_conexion()
@@ -832,7 +895,7 @@ def obtener_producto(id_producto: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/productospost")
+@app.post("/productospost", tags=["Productos"])
 def agregar_producto(nombre: str, precio: float, stock: int, id_categoria: int):
     try:
         cone = get_conexion()
@@ -848,7 +911,7 @@ def agregar_producto(nombre: str, precio: float, stock: int, id_categoria: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/productosput/{id_producto}")
+@app.put("/productosput/{id_producto}", tags=["Productos"])
 def actualizar_producto(id_producto: int, nombre: str, precio: float, stock: int, id_categoria: int):
     try:
         cone = get_conexion()
@@ -871,7 +934,7 @@ def actualizar_producto(id_producto: int, nombre: str, precio: float, stock: int
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/productosdelete/{id_producto}")
+@app.delete("/productosdelete/{id_producto}", tags=["Productos"])
 def eliminar_producto(id_producto: int):
     try:
         cone = get_conexion()
@@ -890,7 +953,7 @@ def eliminar_producto(id_producto: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/productos/{id_producto}")
+@app.patch("/productos/{id_producto}", tags=["Productos"])
 def actualizar_parcial_producto(id_producto: int, nombre: Optional[str] = None, precio: Optional[float] = None,
                                  stock: Optional[int] = None, id_categoria: Optional[int] = None):
     try:
@@ -925,7 +988,7 @@ def actualizar_parcial_producto(id_producto: int, nombre: Optional[str] = None, 
 
 # CRUD inventario
 
-@app.get("/inventariosget")
+@app.get("/inventariosget", tags=["Inventario"])
 def obtener_inventarios():
     try:
         cone = get_conexion()
@@ -944,7 +1007,7 @@ def obtener_inventarios():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/inventariosgetid/{id_inventario}")
+@app.get("/inventariosgetid/{id_inventario}", tags=["Inventario"])
 def obtener_inventario(id_inventario: int):
     try:
         cone = get_conexion()
@@ -961,7 +1024,7 @@ def obtener_inventario(id_inventario: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/inventariospost")
+@app.post("/inventariospost", tags=["Inventario"])
 def agregar_inventario(fecha_actualizacion: str, id_sucursal: int):
     try:
         cone = get_conexion()
@@ -977,7 +1040,7 @@ def agregar_inventario(fecha_actualizacion: str, id_sucursal: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/inventariosput/{id_inventario}")
+@app.put("/inventariosput/{id_inventario}", tags=["Inventario"])
 def actualizar_inventario(id_inventario: int, fecha_actualizacion: str, id_sucursal: int):
     try:
         cone = get_conexion()
@@ -1000,7 +1063,7 @@ def actualizar_inventario(id_inventario: int, fecha_actualizacion: str, id_sucur
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/inventariosdelete/{id_inventario}")
+@app.delete("/inventariosdelete/{id_inventario}", tags=["Inventario"])
 def eliminar_inventario(id_inventario: int):
     try:
         cone = get_conexion()
@@ -1019,7 +1082,7 @@ def eliminar_inventario(id_inventario: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/inventarios/{id_inventario}")
+@app.patch("/inventarios/{id_inventario}", tags=["Inventario"])
 def actualizar_parcial_inventario(id_inventario: int, fecha_actualizacion: Optional[str] = None,
                                   id_sucursal: Optional[int] = None):
     try:
@@ -1048,7 +1111,7 @@ def actualizar_parcial_inventario(id_inventario: int, fecha_actualizacion: Optio
 
 # CRUD pedido
 
-@app.get("/pedidosget")
+@app.get("/pedidosget", tags=["Pedido"])
 def obtener_pedidos():
     try:
         cone = get_conexion()
@@ -1068,7 +1131,7 @@ def obtener_pedidos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/pedidosgetid/{id_pedido}")
+@app.get("/pedidosgetid/{id_pedido}", tags=["Pedido"])
 def obtener_pedido(id_pedido: int):
     try:
         cone = get_conexion()
@@ -1085,7 +1148,7 @@ def obtener_pedido(id_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/pedidospost")
+@app.post("/pedidospost", tags=["Pedido"])
 def agregar_pedido(cliente_id: int, fecha_pedido: str, id_empleado: int, total: float):
     try:
         cone = get_conexion()
@@ -1101,7 +1164,7 @@ def agregar_pedido(cliente_id: int, fecha_pedido: str, id_empleado: int, total: 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/pedidosput/{id_pedido}")
+@app.put("/pedidosput/{id_pedido}", tags=["Pedido"])
 def actualizar_pedido(id_pedido: int, cliente_id: int, fecha_pedido: str, id_empleado: int, total: float):
     try:
         cone = get_conexion()
@@ -1124,7 +1187,7 @@ def actualizar_pedido(id_pedido: int, cliente_id: int, fecha_pedido: str, id_emp
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/pedidosdelete/{id_pedido}")
+@app.delete("/pedidosdelete/{id_pedido}", tags=["Pedido"])
 def eliminar_pedido(id_pedido: int):
     try:
         cone = get_conexion()
@@ -1143,7 +1206,7 @@ def eliminar_pedido(id_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/pedidos/{id_pedido}")
+@app.patch("/pedidos/{id_pedido}", tags=["Pedido"])
 def actualizar_parcial_pedido(id_pedido: int, fecha_pedido: Optional[str] = None,
                                id_cliente: Optional[int] = None, id_empleado: Optional[int] = None):
     try:
@@ -1175,7 +1238,7 @@ def actualizar_parcial_pedido(id_pedido: int, fecha_pedido: Optional[str] = None
 
 # CRUD estado_pedido
 
-@app.get("/estados_pedidoget")
+@app.get("/estados_pedidoget", tags=["Estado Pedido"])
 def obtener_estados_pedido():
     try:
         cone = get_conexion()
@@ -1193,7 +1256,7 @@ def obtener_estados_pedido():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/estados_pedidogetid/{id_estado_pedido}")
+@app.get("/estados_pedidogetid/{id_estado_pedido}", tags=["Estado Pedido"])
 def obtener_estado_pedido(id_estado_pedido: int):
     try:
         cone = get_conexion()
@@ -1210,7 +1273,7 @@ def obtener_estado_pedido(id_estado_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/estados_pedidopost")
+@app.post("/estados_pedidopost", tags=["Estado Pedido"])
 def agregar_estado_pedido(descripcion: str):
     try:
         cone = get_conexion()
@@ -1226,7 +1289,7 @@ def agregar_estado_pedido(descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/estados_pedidoput/{id_estado_pedido}")
+@app.put("/estados_pedidoput/{id_estado_pedido}", tags=["Estado Pedido"])
 def actualizar_estado_pedido(id_estado_pedido: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -1249,7 +1312,7 @@ def actualizar_estado_pedido(id_estado_pedido: int, descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/estados_pedidodelete/{id_estado_pedido}")
+@app.delete("/estados_pedidodelete/{id_estado_pedido}", tags=["Estado Pedido"])
 def eliminar_estado_pedido(id_estado_pedido: int):
     try:
         cone = get_conexion()
@@ -1268,7 +1331,7 @@ def eliminar_estado_pedido(id_estado_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/estados_pedido/{id_estado_pedido}")
+@app.patch("/estados_pedido/{id_estado_pedido}", tags=["Estado Pedido"])
 def actualizar_parcial_estado_pedido(id_estado_pedido: int, descripcion: Optional[str] = None):
     try:
         if not descripcion:
@@ -1288,7 +1351,7 @@ def actualizar_parcial_estado_pedido(id_estado_pedido: int, descripcion: Optiona
 
 # CRUD detalle_pedido
 
-@app.get("/detalle_pedidosget")
+@app.get("/detalle_pedidosget", tags=["Detalle Pedido"])
 def obtener_detalle_pedidos():
     try:
         cone = get_conexion()
@@ -1309,7 +1372,7 @@ def obtener_detalle_pedidos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/detalle_pedidosgetid/{id_detalle_pedido}")
+@app.get("/detalle_pedidosgetid/{id_detalle_pedido}", tags=["Detalle Pedido"])
 def obtener_detalle_pedido(id_detalle_pedido: int):
     try:
         cone = get_conexion()
@@ -1332,7 +1395,7 @@ def obtener_detalle_pedido(id_detalle_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/detalle_pedidospost")
+@app.post("/detalle_pedidospost", tags=["Detalle Pedido"])
 def agregar_detalle_pedido(id_pedido: int, id_producto: int, cantidad: int, subtotal: float):
     try:
         cone = get_conexion()
@@ -1348,7 +1411,7 @@ def agregar_detalle_pedido(id_pedido: int, id_producto: int, cantidad: int, subt
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/detalle_pedidosput/{id_detalle_pedido}")
+@app.put("/detalle_pedidosput/{id_detalle_pedido}", tags=["Detalle Pedido"])
 def actualizar_detalle_pedido(id_detalle_pedido: int, id_pedido: int, id_producto: int, cantidad: int, subtotal: float):
     try:
         cone = get_conexion()
@@ -1371,7 +1434,7 @@ def actualizar_detalle_pedido(id_detalle_pedido: int, id_pedido: int, id_product
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/detalle_pedidosdelete/{id_detalle_pedido}")
+@app.delete("/detalle_pedidosdelete/{id_detalle_pedido}", tags=["Detalle Pedido"])
 def eliminar_detalle_pedido(id_detalle_pedido: int):
     try:
         cone = get_conexion()
@@ -1390,7 +1453,7 @@ def eliminar_detalle_pedido(id_detalle_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/detalle_pedidos/{id_detalle_pedido}")
+@app.patch("/detalle_pedidos/{id_detalle_pedido}", tags=["Detalle Pedido"])
 def actualizar_parcial_detalle_pedido(id_detalle_pedido: int, id_pedido: Optional[int] = None,
                                       id_producto: Optional[int] = None, cantidad: Optional[int] = None,
                                       subtotal: Optional[float] = None):
@@ -1426,7 +1489,7 @@ def actualizar_parcial_detalle_pedido(id_detalle_pedido: int, id_pedido: Optiona
 
 # CRUD factura
 
-@app.get("/facturasget")
+@app.get("/facturasget", tags=["Factura"])
 def obtener_facturas():
     try:
         cone = get_conexion()
@@ -1445,7 +1508,7 @@ def obtener_facturas():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/facturasgetid/{id_factura}")
+@app.get("/facturasgetid/{id_factura}", tags=["Factura"])
 def obtener_factura(id_factura: int):
     try:
         cone = get_conexion()
@@ -1466,7 +1529,7 @@ def obtener_factura(id_factura: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/facturaspost")
+@app.post("/facturaspost", tags=["Factura"])
 def agregar_factura(id_pedido: int, fecha_emision: str, total: float):
     try:
         cone = get_conexion()
@@ -1482,7 +1545,7 @@ def agregar_factura(id_pedido: int, fecha_emision: str, total: float):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/facturasput/{id_factura}")
+@app.put("/facturasput/{id_factura}", tags=["Factura"])
 def actualizar_factura(id_factura: int, id_pedido: int, fecha_emision: str, total: float):
     try:
         cone = get_conexion()
@@ -1505,7 +1568,7 @@ def actualizar_factura(id_factura: int, id_pedido: int, fecha_emision: str, tota
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/facturasdelete/{id_factura}")
+@app.delete("/facturasdelete/{id_factura}", tags=["Factura"])
 def eliminar_factura(id_factura: int):
     try:
         cone = get_conexion()
@@ -1526,7 +1589,7 @@ def eliminar_factura(id_factura: int):
 
 # CRUD tipo_transaccion
 
-@app.get("/tipos_transaccionget")
+@app.get("/tipos_transaccionget", tags=["Tipo Transacción"])
 def obtener_tipos_transaccion():
     try:
         cone = get_conexion()
@@ -1544,7 +1607,7 @@ def obtener_tipos_transaccion():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/tipos_transacciongetid/{id_tipo_transaccion}")
+@app.get("/tipos_transacciongetid/{id_tipo_transaccion}", tags=["Tipo Transacción"])
 def obtener_tipo_transaccion(id_tipo_transaccion: int):
     try:
         cone = get_conexion()
@@ -1564,7 +1627,7 @@ def obtener_tipo_transaccion(id_tipo_transaccion: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/tipos_transaccionpost")
+@app.post("/tipos_transaccionpost", tags=["Tipo Transacción"])
 def agregar_tipo_transaccion(descripcion: str):
     try:
         cone = get_conexion()
@@ -1580,7 +1643,7 @@ def agregar_tipo_transaccion(descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/tipos_transaccionput/{id_tipo_transaccion}")
+@app.put("/tipos_transaccionput/{id_tipo_transaccion}", tags=["Tipo Transacción"])
 def actualizar_tipo_transaccion(id_tipo_transaccion: int, descripcion: str):
     try:
         cone = get_conexion()
@@ -1603,7 +1666,7 @@ def actualizar_tipo_transaccion(id_tipo_transaccion: int, descripcion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/tipos_transacciondelete/{id_tipo_transaccion}")
+@app.delete("/tipos_transacciondelete/{id_tipo_transaccion}", tags=["Tipo Transacción"])
 def eliminar_tipo_transaccion(id_tipo_transaccion: int):
     try:
         cone = get_conexion()
@@ -1622,7 +1685,7 @@ def eliminar_tipo_transaccion(id_tipo_transaccion: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/tipos_transaccion/{id_tipo_transaccion}")
+@app.patch("/tipos_transaccion/{id_tipo_transaccion}", tags=["Tipo Transacción"])
 def actualizar_parcial_tipo_transaccion(id_tipo_transaccion: int, descripcion: Optional[str] = None):
     try:
         if not descripcion:
@@ -1642,7 +1705,7 @@ def actualizar_parcial_tipo_transaccion(id_tipo_transaccion: int, descripcion: O
 
 # CRUD reporte_ventas
 
-@app.get("/reportes_ventasget")
+@app.get("/reportes_ventasget", tags=["Reporte Venta"])
 def obtener_reportes_ventas():
     try:
         cone = get_conexion()
@@ -1661,7 +1724,7 @@ def obtener_reportes_ventas():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/reportes_ventasgetid/{id_reportes}")
+@app.get("/reportes_ventasgetid/{id_reportes}", tags=["Reporte Venta"])
 def obtener_reporte_ventas(id_reportes: int):
     try:
         cone = get_conexion()
@@ -1682,7 +1745,7 @@ def obtener_reporte_ventas(id_reportes: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/reportes_ventaspost")
+@app.post("/reportes_ventaspost", tags=["Reporte Venta"])
 def agregar_reporte_ventas(fecha_generacion: str, total_ventas: float):
     try:
         cone = get_conexion()
@@ -1698,7 +1761,7 @@ def agregar_reporte_ventas(fecha_generacion: str, total_ventas: float):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/reportes_ventasput/{id_reportes}")
+@app.put("/reportes_ventasput/{id_reportes}", tags=["Reporte Venta"])
 def actualizar_reporte_ventas(id_reportes: int, fecha_generacion: str, total_ventas: float):
     try:
         cone = get_conexion()
@@ -1721,7 +1784,7 @@ def actualizar_reporte_ventas(id_reportes: int, fecha_generacion: str, total_ven
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/reportes_ventasdelete/{id_reportes}")
+@app.delete("/reportes_ventasdelete/{id_reportes}", tags=["Reporte Venta"])
 def eliminar_reporte_ventas(id_reportes: int):
     try:
         cone = get_conexion()
@@ -1740,7 +1803,7 @@ def eliminar_reporte_ventas(id_reportes: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/reportes_ventas/{id_reportes}")
+@app.patch("/reportes_ventas/{id_reportes}", tags=["Reporte Venta"])
 def actualizar_parcial_reporte_ventas(id_reportes: int, fecha_generacion: Optional[str] = None,
                                       total_ventas: Optional[float] = None):
     try:
@@ -1769,7 +1832,7 @@ def actualizar_parcial_reporte_ventas(id_reportes: int, fecha_generacion: Option
 
 # CRUD reporte_desempenio
 
-@app.get("/reportes_desempenioget")
+@app.get("/reportes_desempenioget", tags=["Reporte Desempeño"])
 def obtener_reportes_desempenio():
     try:
         cone = get_conexion()
@@ -1788,7 +1851,7 @@ def obtener_reportes_desempenio():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/reportes_desempeniogetid/{id_reporte_desempenio}")
+@app.get("/reportes_desempeniogetid/{id_reporte_desempenio}", tags=["Reporte Desempeño"])
 def obtener_reporte_desempenio(id_reporte_desempenio: int):
     try:
         cone = get_conexion()
@@ -1809,7 +1872,7 @@ def obtener_reporte_desempenio(id_reporte_desempenio: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/reportes_desempeniopost")
+@app.post("/reportes_desempeniopost", tags=["Reporte Desempeño"])
 def agregar_reporte_desempenio(fecha_generacion: str, datos_evaluacion: str):
     try:
         cone = get_conexion()
@@ -1825,7 +1888,7 @@ def agregar_reporte_desempenio(fecha_generacion: str, datos_evaluacion: str):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/reportes_desempenioput/{id_reporte_desempenio}")
+@app.put("/reportes_desempenioput/{id_reporte_desempenio}", tags=["Reporte Desempeño"])
 def actualizar_reporte_desempenio(id_reporte_desempenio: int, fecha_generacion: str, datos_evaluacion: str):
     try:
         cone = get_conexion()
@@ -1848,7 +1911,7 @@ def actualizar_reporte_desempenio(id_reporte_desempenio: int, fecha_generacion: 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/reportes_desempeniodelete/{id_reporte_desempenio}")
+@app.delete("/reportes_desempeniodelete/{id_reporte_desempenio}", tags=["Reporte Desempeño"])
 def eliminar_reporte_desempenio(id_reporte_desempenio: int):
     try:
         cone = get_conexion()
@@ -1867,7 +1930,7 @@ def eliminar_reporte_desempenio(id_reporte_desempenio: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/reportes_desempenio/{id_reporte_desempenio}")
+@app.patch("/reportes_desempenio/{id_reporte_desempenio}", tags=["Reporte Desempeño"])
 def actualizar_parcial_reporte_desempenio(id_reporte_desempenio: int, fecha_generacion: Optional[str] = None,
                                           datos_evaluacion: Optional[str] = None):
     try:
