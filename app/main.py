@@ -4,66 +4,67 @@ from typing import Optional
 
 tags_metadata = [
     {
-        "Nombre": "Ciudad",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Ciudad",
+        "description": "ID CIUDAD/DESCRIPCION de la Ciudad formato CRUD",
     },
     {
-        "Nombre": "Sucursal",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Sucursal",
+        "description": "ID SUCURSAL/NOMBRE SUCURSAL/DIRECCION/ID CIUDAD de la Sucursal formato CRUD",
     },
     {
-        "Nombre": "Empleado",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Empleado",
+        "description": "ID EMPLEADO/P NOMBRE/S NOMBRE/P APELLIDO/S APELLIDO/SALARIO del Empleado formato CRUD",
     },
     {
-        "Nombre": "Cargo",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Cargo",
+        "description": "ID CARGO/DESCRIPCION del Cargo formato CRUD",
     },
     {
-        "Nombre": "Cliente",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Cliente",
+        "description": "ID CLIENTE/RUT/P NOMBRE/S NOMBRE/P APELLIDO/S APELLIDO/CORREO/TELEFONO del Cliente formato CRUD",
     },
     {
-        "Nombre": "Categoría",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Categoría",
+        "description": "ID CATEGORIA/DESCRIPCION de la Ciudad formato CRUD",
     },
     {
-        "Nombre": "Productos",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Productos",
+        "description": "ID PRODUCTO/NOMBRE/MARCA/PRECIO/STOCK/ID CATEGORIA de los Productos formato CRUD",
     },
     {
-        "Nombre": "Inventario",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Inventario",
+        "description": "ID INVENTARIO/FECHA ACTUALIZACION/ID SUCURSAL del Inventario formato CRUD",
     },
     {
-        "Nombre": "Pedidos",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Pedidos",
+        "description": "ID PEDIDO/FECHA PEDIDO/ID CLIENTE/ID EMPLEADO de los Pedidos formato CRUD",
     },
     {
-        "Nombre": "Estado Pedido",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Estado Pedido",
+        "description": "ID ESTADO PEDIDO/DESCRIPCION del Estado Pedido formato CRUD",
     },
     {
-        "Nombre": "Detalle Pedido",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Detalle Pedido",
+        "description": "ID DETALLE PEDIDO/ID PEDIDO/ID PRODUCTO/CANTIDAD/SUBTOTAL de los Detalles Pedidos formato CRUD",
     },
     {
-        "Nombre": "Factura",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Factura",
+        "description": "ID FACTURA/TOTAL/FECHA EMISION/ID PEDIDO del Factura formato CRUD",
     },
     {
-        "Nombre": "Tipo Transacción",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Tipo Transacción",
+        "description": "ID TIPO TRANSACCION/DESCRIPCION de la Ciudad formato CRUD",
     },
     {
-        "Nombre": "Reporte Venta",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
+        "name": "Reporte Venta",
+        "description": "ID REPORTES/FECHA GENERACION/TOTAL VENTAS de los Reportes Ventas formato CRUD",
     },
     {
-        "Nombre": "Reporte Desempeño",
-        "Descripción": "Id e Nombre de la ciudad formato CRUD",
-    }
+        "name": "Reporte Desempeño",
+        "description": "ID REPORTE DESEMPENIO/FECHA GENERACION/DATOS EVALUACION de los Reportes Desempeños formato CRUD",
+    },
 ]
+
 
 app = FastAPI(openapi_tags=tags_metadata)
 
@@ -869,7 +870,7 @@ def obtener_productos():
         for id_producto, nombre, precio in cursor:
             productos.append({
                 "id_producto": id_producto,
-                "nombre": nombre,
+                "name": nombre,
                 "precio": precio
             })
         cursor.close()
@@ -889,7 +890,7 @@ def obtener_producto(id_producto: int):
         cone.close()
         
         if producto:
-            return {"id_producto": producto[0], "nombre": producto[1], "precio": producto[2]}
+            return {"id_producto": producto[0], "name": producto[1], "precio": producto[2]}
         else:
             raise HTTPException(status_code=404, detail="Producto no encontrado")
     except Exception as e:
@@ -903,7 +904,7 @@ def agregar_producto(nombre: str, precio: float, stock: int, id_categoria: int):
         cursor.execute("""
             INSERT INTO productos
             VALUES (:nombre, :precio, :stock, :id_categoria)
-        """, {"nombre": nombre, "precio": precio, "stock": stock, "id_categoria": id_categoria})
+        """, {"name": nombre, "precio": precio, "stock": stock, "id_categoria": id_categoria})
         cone.commit()
         cursor.close()
         cone.close()
@@ -920,7 +921,7 @@ def actualizar_producto(id_producto: int, nombre: str, precio: float, stock: int
             UPDATE productos
             SET nombre = :nombre, precio = :precio, stock = :stock, id_categoria = :id_categoria
             WHERE id_producto = :id_producto
-        """, {"id_producto": id_producto, "nombre": nombre, "precio": precio, "stock": stock, "id_categoria": id_categoria})
+        """, {"id_producto": id_producto, "name": nombre, "precio": precio, "stock": stock, "id_categoria": id_categoria})
         
         if cursor.rowcount == 0:
             cursor.close()
@@ -965,7 +966,7 @@ def actualizar_parcial_producto(id_producto: int, nombre: Optional[str] = None, 
         valores = {"id_producto": id_producto}
         if nombre:
             campos.append("nombre = :nombre")
-            valores["nombre"] = nombre
+            valores["name"] = nombre
         if precio:
             campos.append("precio = :precio")
             valores["precio"] = precio
@@ -1111,7 +1112,7 @@ def actualizar_parcial_inventario(id_inventario: int, fecha_actualizacion: Optio
 
 # CRUD pedido
 
-@app.get("/pedidosget", tags=["Pedido"])
+@app.get("/pedidosget", tags=["Pedidos"])
 def obtener_pedidos():
     try:
         cone = get_conexion()
@@ -1131,7 +1132,7 @@ def obtener_pedidos():
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.get("/pedidosgetid/{id_pedido}", tags=["Pedido"])
+@app.get("/pedidosgetid/{id_pedido}", tags=["Pedidos"])
 def obtener_pedido(id_pedido: int):
     try:
         cone = get_conexion()
@@ -1148,7 +1149,7 @@ def obtener_pedido(id_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.post("/pedidospost", tags=["Pedido"])
+@app.post("/pedidospost", tags=["Pedidos"])
 def agregar_pedido(cliente_id: int, fecha_pedido: str, id_empleado: int, total: float):
     try:
         cone = get_conexion()
@@ -1164,7 +1165,7 @@ def agregar_pedido(cliente_id: int, fecha_pedido: str, id_empleado: int, total: 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.put("/pedidosput/{id_pedido}", tags=["Pedido"])
+@app.put("/pedidosput/{id_pedido}", tags=["Pedidos"])
 def actualizar_pedido(id_pedido: int, cliente_id: int, fecha_pedido: str, id_empleado: int, total: float):
     try:
         cone = get_conexion()
@@ -1187,7 +1188,7 @@ def actualizar_pedido(id_pedido: int, cliente_id: int, fecha_pedido: str, id_emp
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.delete("/pedidosdelete/{id_pedido}", tags=["Pedido"])
+@app.delete("/pedidosdelete/{id_pedido}", tags=["Pedidos"])
 def eliminar_pedido(id_pedido: int):
     try:
         cone = get_conexion()
@@ -1206,7 +1207,7 @@ def eliminar_pedido(id_pedido: int):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-@app.patch("/pedidos/{id_pedido}", tags=["Pedido"])
+@app.patch("/pedidos/{id_pedido}", tags=["Pedidos"])
 def actualizar_parcial_pedido(id_pedido: int, fecha_pedido: Optional[str] = None,
                                id_cliente: Optional[int] = None, id_empleado: Optional[int] = None):
     try:
