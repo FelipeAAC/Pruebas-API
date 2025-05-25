@@ -73,6 +73,7 @@ CREATE TABLE productos (
     precio NUMBER(10, 2) NOT NULL,
     stock NUMBER NOT NULL,
     id_categoria NUMBER,
+    imagen_url VARCHAR2(255),
     FOREIGN KEY (id_categoria) REFERENCES categoria(id_categoria) ON DELETE SET NULL
 );
 
