@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Header, status, File, UploadFile
 from fastapi.staticfiles import StaticFiles
+from fastapi.middleware.cors import CORSMiddleware
 import oracledb
 import datetime
 from typing import Optional
@@ -79,8 +80,22 @@ tags_metadata = [
     },
 ]
 
+origins = [
+    "http://localhost:8000",  # Tu frontend Django
+    "http://127.0.0.1:8000", # También para Django
+]
+
 app = FastAPI(openapi_tags=tags_metadata)
 logger = logging.getLogger(__name__)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"], # Permite todos los métodos (GET, POST, etc.)
+    allow_headers=["*"], # Permite todos los encabezados
+)
+
 #Conexión con OracleDB
 
 def get_conexion():
