@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Header, status, File, UploadFile
+from fastapi import FastAPI, HTTPException, Header, status, File, UploadFile, Depends
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 import oracledb
@@ -8,6 +8,7 @@ from datetime import date
 import shutil
 import os 
 import logging
+import asyncio
 
 tags_metadata = [
     {
@@ -1681,6 +1682,62 @@ def actualizar_parcial_cliente(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error de BD al actualizar parcialmente cliente: {error_obj.message.strip()}")
     except Exception as ex:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error inesperado al actualizar parcialmente cliente: {str(ex)}")
+    
+@app.get("/clientes/{id_cliente_param}/pedidos", tags=["Cliente", "Pedidos"], summary="Obtener todos los pedidos de un cliente")
+async def obtener_pedidos_por_cliente(id_cliente_param: int, db_conn: oracledb.Connection = Depends(get_conexion)):
+    pedidos_completos = []
+    try:
+        with db_conn.cursor() as cursor:
+            # Primero, obtener todos los pedidos del cliente
+            sql_pedidos = """
+                SELECT p.id_pedido, p.fecha_pedido, p.total_pedido, ep.descripcion as estado_descripcion, ep.id_estado_pedido
+                FROM pedido p
+                JOIN estado_pedido ep ON p.id_estado_pedido = ep.id_estado_pedido
+                WHERE p.id_cliente = :id_cliente
+                ORDER BY p.fecha_pedido DESC, p.id_pedido DESC
+            """
+            await asyncio.to_thread(cursor.execute, sql_pedidos, id_cliente=id_cliente_param)
+            pedidos_raw = await asyncio.to_thread(cursor.fetchall)
+
+            if not pedidos_raw:
+                return [] # Devuelve lista vacía si no hay pedidos
+
+            column_names_pedido = [desc[0].lower() for desc in cursor.description]
+
+            for pedido_row_tuple in pedidos_raw:
+                pedido_dict = dict(zip(column_names_pedido, pedido_row_tuple))
+                
+                # Formatear fecha si es necesario (ya lo haces en otros endpoints)
+                if pedido_dict.get('fecha_pedido') and isinstance(pedido_dict['fecha_pedido'], datetime.date):
+                    pedido_dict['fecha_pedido'] = pedido_dict['fecha_pedido'].isoformat()
+
+                pedido_dict['detalles'] = []
+                sql_detalles = """
+                    SELECT dp.id_detalle_pedido, dp.id_producto, pr.nombre as nombre_producto, 
+                           dp.cantidad, dp.precio_unitario_venta, dp.subtotal, pr.imagen_url
+                    FROM detalle_pedido dp
+                    JOIN productos pr ON dp.id_producto = pr.id_producto
+                    WHERE dp.id_pedido = :id_pedido_actual
+                    ORDER BY dp.id_detalle_pedido
+                """
+                with db_conn.cursor() as cursor_detalle:
+                    await asyncio.to_thread(cursor_detalle.execute, sql_detalles, id_pedido_actual=pedido_dict['id_pedido'])
+                    detalles_raw = await asyncio.to_thread(cursor_detalle.fetchall)
+                    
+                    if detalles_raw:
+                        column_names_detalle = [desc[0].lower() for desc in cursor_detalle.description]
+                        for detalle_row_tuple in detalles_raw:
+                            pedido_dict['detalles'].append(dict(zip(column_names_detalle, detalle_row_tuple)))
+                
+                pedidos_completos.append(pedido_dict)
+            
+            return pedidos_completos
+
+    except oracledb.Error as e:
+        error_obj, = e.args
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error de base de datos al obtener pedidos: {error_obj.message.strip()}")
+    except Exception as ex:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error inesperado en el servidor: {str(ex)}")
     
 # CRUD Productos
 
