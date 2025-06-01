@@ -1,14 +1,27 @@
-from fastapi import FastAPI, HTTPException, Header, status, File, UploadFile, Depends
-from fastapi.staticfiles import StaticFiles
-from fastapi.middleware.cors import CORSMiddleware
-import oracledb
-import datetime
-from typing import Optional
-from datetime import date
-import shutil
-import os 
-import logging
 import asyncio
+import datetime
+import logging
+import os
+import shutil
+import requests
+import oracledb
+
+from datetime import date
+from fastapi import (
+    Depends,
+    FastAPI,
+    File,
+    Header,
+    HTTPException,
+    Response,
+    UploadFile,
+    status,
+)
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import BaseModel
+from typing import List, Optional
 
 tags_metadata = [
     {
@@ -37,15 +50,15 @@ tags_metadata = [
     },
     {
         "name": "Empleado",
-        "description": "ID EMPLEADO/RUT/P NOMBRE/S NOMBRE/P APELLIDO/S APELLIDO/CORREO/TELEFONO/SALARIO/ID CARGO/ID SUCURSAL/ACTIVO del Empleado formato CRUD", # Descripción actualizada para mayor detalle.
+        "description": "ID EMPLEADO/RUT/P NOMBRE/S NOMBRE/P APELLIDO/S APELLIDO/CORREO/TELEFONO/SALARIO/ID CARGO/ID SUCURSAL/ACTIVO del Empleado formato CRUD",
     },
     {
         "name": "Cliente",
-        "description": "ID CLIENTE/P NOMBRE/S NOMBRE/P APELLIDO/S APELLIDO/CORREO/TELEFONO/ACTIVO del Cliente formato CRUD", # Descripción actualizada según tabla, sin RUT.
+        "description": "ID CLIENTE/P NOMBRE/S NOMBRE/P APELLIDO/S APELLIDO/CORREO/TELEFONO/ACTIVO del Cliente formato CRUD",
     },
     {
         "name": "Productos",
-        "description": "ID PRODUCTO/NOMBRE/MARCA/DESCRIPCION/PRECIO/ID CATEGORIA/IMAGEN URL de los Productos formato CRUD", # Descripción actualizada para mayor detalle.
+        "description": "ID PRODUCTO/NOMBRE/MARCA/DESCRIPCION/PRECIO/ID CATEGORIA/IMAGEN URL de los Productos formato CRUD",
     },
     {
         "name": "Stock Sucursal",
@@ -57,7 +70,7 @@ tags_metadata = [
     },
     {
         "name": "Pedidos",
-        "description": "ID PEDIDO/FECHA PEDIDO/ID CLIENTE/ID EMPLEADO VENDEDOR/ID SUCURSAL ORIGEN/ID ESTADO PEDIDO/TOTAL PEDIDO de los Pedidos formato CRUD", # Descripción actualizada para mayor detalle.
+        "description": "ID PEDIDO/FECHA PEDIDO/ID CLIENTE/ID EMPLEADO VENDEDOR/ID SUCURSAL ORIGEN/ID ESTADO PEDIDO/TOTAL PEDIDO de los Pedidos formato CRUD",
     },
     {
         "name": "Detalle Pedido",
@@ -65,7 +78,7 @@ tags_metadata = [
     },
     {
         "name": "Factura",
-        "description": "ID FACTURA/NUMERO FACTURA/ID PEDIDO/FECHA EMISION/TOTAL NETO/IVA/TOTAL CON IVA de la Factura formato CRUD", # Descripción actualizada para mayor detalle.
+        "description": "ID FACTURA/NUMERO FACTURA/ID PEDIDO/FECHA EMISION/TOTAL NETO/IVA/TOTAL CON IVA de la Factura formato CRUD",
     },
     {
         "name": "Transacción",
@@ -73,11 +86,11 @@ tags_metadata = [
     },
     {
         "name": "Reporte Venta",
-        "description": "ID REPORTE VENTAS/FECHA GENERACION/PERIODO INICIO/PERIODO FIN/TOTAL VENTAS CALCULADO/ID SUCURSAL de los Reportes Ventas formato CRUD", # Descripción actualizada para mayor detalle.
+        "description": "ID REPORTE VENTAS/FECHA GENERACION/PERIODO INICIO/PERIODO FIN/TOTAL VENTAS CALCULADO/ID SUCURSAL de los Reportes Ventas formato CRUD",
     },
     {
         "name": "Reporte Desempeño",
-        "description": "ID REPORTE DESEMPENIO/ID EMPLEADO/FECHA GENERACION/PERIODO EVALUACION INICIO/PERIODO EVALUACION FIN/DATOS EVALUACION de los Reportes Desempeños formato CRUD", # Descripción actualizada para mayor detalle.
+        "description": "ID REPORTE DESEMPENIO/ID EMPLEADO/FECHA GENERACION/PERIODO EVALUACION INICIO/PERIODO EVALUACION FIN/DATOS EVALUACION de los Reportes Desempeños formato CRUD",
     },
 ]
 
@@ -97,8 +110,7 @@ app.add_middleware(
     allow_headers=["*"], # Permite todos los encabezados
 )
 
-#Conexión con OracleDB
-
+# Conexión con OracleDB
 def get_conexion():
     conexion = oracledb.connect(
         user="prueba_api",
@@ -107,7 +119,7 @@ def get_conexion():
     )
     return conexion
 """
-#Conexión con OracleDB Duoc
+# Conexión con OracleDB Duoc
 def get_conexion():
     conexion = oracledb.connect(
         user="prueba_api",
@@ -116,6 +128,145 @@ def get_conexion():
     )
     return conexion
 """
+
+PAYPAL_CLIENT_ID = "AYOlbCxD6Gd60gXLsP5SkArDzzM5ZUAeComtgqaKVqj5_MVhv6TeYL2dChy-g8TqxTDsL3wumWLMcnTg"
+PAYPAL_SECRET = "EBVvvVmJQRlxx4O2TV3BdpaySik2cK2Fl3LNbPtkrEFO4Cci-TM6oNNjRnpZbaJmA_GFQB4wCouD2oum"
+PAYPAL_API = "https://api-m.sandbox.paypal.com"
+
+class CartItem(BaseModel):
+    name: str
+    price: float
+    quantity: int
+
+class PayPalCartItem(BaseModel):
+    id: int
+    name: str
+    price: float
+    quantity: int
+
+class PayPalCaptureRequest(BaseModel):
+    orderID: str
+    cart: list[PayPalCartItem]
+    id_cliente: int
+
+@app.post("/paypal/create/")
+def paypal_create_order(cart: List[CartItem]):
+    auth = (PAYPAL_CLIENT_ID, PAYPAL_SECRET)
+    token_resp = requests.post(
+        f"{PAYPAL_API}/v1/oauth2/token",
+        auth=auth,
+        data={"grant_type": "client_credentials"},
+        headers={"Accept": "application/json", "Accept-Language": "en_US"},
+    )
+    if token_resp.status_code != 200:
+        raise HTTPException(status_code=500, detail="No se pudo autenticar con PayPal")
+    access_token = token_resp.json().get("access_token")
+
+    items = [
+        {
+            "name": item.name,
+            "unit_amount": {
+                "currency_code": "CLP",
+                "value": str(int(item.price))
+            },
+            "quantity": str(item.quantity)
+        }
+        for item in cart
+    ]
+    total = sum(item.price * item.quantity for item in cart)
+    order_payload = {
+        "intent": "CAPTURE",
+        "purchase_units": [{
+            "amount": {
+                "currency_code": "CLP",
+                "value": str(int(total)),
+                "breakdown": {
+                    "item_total": {
+                        "currency_code": "CLP",
+                        "value": str(int(total))
+                    }
+                }
+            },
+            "items": items
+        }]
+    }
+    print("PAYPAL ORDER PAYLOAD:", order_payload)  # <-- Depuración
+
+    resp = requests.post(
+        f"{PAYPAL_API}/v2/checkout/orders",
+        headers={
+            "Authorization": f"Bearer {access_token}",
+            "Content-Type": "application/json"
+        },
+        json=order_payload
+    )
+    if resp.status_code not in (200, 201):
+        print("PAYPAL ERROR:", resp.text)  # <-- Depuración de error
+        raise HTTPException(status_code=500, detail="No se pudo crear la orden en PayPal")
+    return resp.json()
+
+@app.post("/paypal/capture/", tags=["Pedidos"])
+def paypal_capture(data: PayPalCaptureRequest):
+    # 1. Obtener access_token de PayPal
+    auth = (PAYPAL_CLIENT_ID, PAYPAL_SECRET)
+    token_resp = requests.post(
+        f"{PAYPAL_API}/v1/oauth2/token",
+        auth=auth,
+        data={"grant_type": "client_credentials"},
+        headers={"Accept": "application/json", "Accept-Language": "en_US"},
+    )
+    if token_resp.status_code != 200:
+        raise HTTPException(status_code=500, detail="No se pudo autenticar con PayPal")
+    access_token = token_resp.json().get("access_token")
+
+    # 2. Capturar la orden
+    capture_resp = requests.post(
+        f"{PAYPAL_API}/v2/checkout/orders/{data.orderID}/capture",
+        headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
+    )
+    capture_data = capture_resp.json()
+    if capture_resp.status_code not in (200, 201) or capture_data.get("status") != "COMPLETED":
+        raise HTTPException(status_code=400, detail="El pago no fue completado en PayPal")
+
+    # 3. Registrar el pedido en Oracle
+    try:
+        with get_conexion() as cone:
+            with cone.cursor() as cursor:
+                # Obtener el siguiente id_pedido
+                cursor.execute("SELECT NVL(MAX(id_pedido), 0) + 1 FROM pedido")
+                id_pedido = cursor.fetchone()[0]
+                id_estado_pedido = 1  # Por ejemplo: 1 = "Pendiente"
+                total_pedido = sum(item.price * item.quantity for item in data.cart)
+                cursor.execute("""
+                    INSERT INTO pedido (id_pedido, id_cliente, id_estado_pedido, total_pedido)
+                    VALUES (:id_pedido, :id_cliente, :id_estado_pedido, :total_pedido)
+                """, {
+                    "id_pedido": id_pedido,
+                    "id_cliente": data.id_cliente,
+                    "id_estado_pedido": id_estado_pedido,
+                    "total_pedido": total_pedido
+                })
+                # Insertar detalles
+                for item in data.cart:
+                    cursor.execute("SELECT NVL(MAX(id_detalle_pedido), 0) + 1 FROM detalle_pedido")
+                    id_detalle_pedido = cursor.fetchone()[0]
+                    cursor.execute("""
+                        INSERT INTO detalle_pedido (id_detalle_pedido, id_pedido, id_producto, cantidad, precio_unitario_venta, subtotal)
+                        VALUES (:id_detalle_pedido, :id_pedido, :id_producto, :cantidad, :precio_unitario_venta, :subtotal)
+                    """, {
+                        "id_detalle_pedido": id_detalle_pedido,
+                        "id_pedido": id_pedido,
+                        "id_producto": item.id,
+                        "cantidad": item.quantity,
+                        "precio_unitario_venta": item.price,
+                        "subtotal": item.price * item.quantity
+                    })
+                cone.commit()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error al registrar pedido: {str(e)}")
+
+    return {"success": True, "redirect_url": "http://127.0.0.1:8000/compra_exitosa/"}
+
 def dict_from_row(cursor, row_tuple: Optional[tuple]):
     if not row_tuple:
         return None
