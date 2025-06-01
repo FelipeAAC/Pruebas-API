@@ -7,6 +7,7 @@ import requests
 import oracledb
 
 from datetime import date
+from datetime import datetime
 from fastapi import (
     Depends,
     FastAPI,
@@ -132,6 +133,17 @@ def get_conexion():
 PAYPAL_CLIENT_ID = "AYOlbCxD6Gd60gXLsP5SkArDzzM5ZUAeComtgqaKVqj5_MVhv6TeYL2dChy-g8TqxTDsL3wumWLMcnTg"
 PAYPAL_SECRET = "EBVvvVmJQRlxx4O2TV3BdpaySik2cK2Fl3LNbPtkrEFO4Cci-TM6oNNjRnpZbaJmA_GFQB4wCouD2oum"
 PAYPAL_API = "https://api-m.sandbox.paypal.com"
+
+class DetallePedidoPayload(BaseModel):
+    id_producto: int
+    cantidad: int
+    precio_unitario_venta: float
+    subtotal: float
+
+class PedidoPayload(BaseModel):
+    id_cliente: int
+    total_pedido: float
+    detalles: List[DetallePedidoPayload]
 
 class CartItem(BaseModel):
     name: str
@@ -2711,71 +2723,53 @@ def obtener_pedido_por_id(id_pedido_param: int):
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error de servidor al obtener pedido: {str(ex)}")
 
 @app.post("/pedidopost", tags=["Pedidos"])
-def agregar_pedido(
-    id_pedido: int,
-    id_estado_pedido: int,
-    fecha_pedido_str: Optional[str] = None,
-    id_cliente: Optional[int] = None,
-    id_empleado_vendedor: Optional[int] = None,
-    id_sucursal_origen: Optional[int] = None,
-    total_pedido: float = 0.0
-):
+def agregar_pedido(payload: PedidoPayload):
+    print("Payload recibido:", payload.dict())
     try:
         with get_conexion() as cone:
             with cone.cursor() as cursor:
-                cursor.execute("SELECT id_pedido FROM pedido WHERE id_pedido = :p_id_pedido", {"p_id_pedido": id_pedido})
-                if cursor.fetchone():
-                    raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Ya existe un pedido con el ID {id_pedido}.")
+                cursor.execute("SELECT NVL(MAX(id_pedido), 0) + 1 FROM pedido")
+                id_pedido = cursor.fetchone()[0]
+                id_estado_pedido = 1
+                fecha_pedido = datetime.now()
+                id_empleado_vendedor = 1
+                id_sucursal_origen = 1
 
-                if id_cliente is not None:
-                    cursor.execute("SELECT id_cliente FROM cliente WHERE id_cliente = :p_id_cli", {"p_id_cli": id_cliente})
-                    if not cursor.fetchone():
-                        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"El cliente con id {id_cliente} no existe.")
-                if id_empleado_vendedor is not None:
-                    cursor.execute("SELECT id_empleado FROM empleado WHERE id_empleado = :p_id_emp", {"p_id_emp": id_empleado_vendedor})
-                    if not cursor.fetchone():
-                        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"El empleado con id {id_empleado_vendedor} no existe.")
-                if id_sucursal_origen is not None:
-                    cursor.execute("SELECT id_sucursal FROM sucursal WHERE id_sucursal = :p_id_suc", {"p_id_suc": id_sucursal_origen})
-                    if not cursor.fetchone():
-                        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"La sucursal con id {id_sucursal_origen} no existe.")
-                
-                cursor.execute("SELECT id_estado_pedido FROM estado_pedido WHERE id_estado_pedido = :p_id_est_ped", {"p_id_est_ped": id_estado_pedido})
-                if not cursor.fetchone():
-                    raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"El estado de pedido con id {id_estado_pedido} no existe.")
-
-                fecha_para_insertar = None
-                if fecha_pedido_str:
-                    try:
-                        fecha_para_insertar = date.fromisoformat(fecha_pedido_str)
-                    except ValueError:
-                        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Formato de fecha_pedido inválido. Usar YYYY-MM-DD.")
-                
-                sql = """
+                cursor.execute("""
                     INSERT INTO pedido (
-                        id_pedido, fecha_pedido, id_cliente, id_empleado_vendedor,
-                        id_sucursal_origen, id_estado_pedido, total_pedido
+                        id_pedido, fecha_pedido, id_cliente, id_empleado_vendedor, id_sucursal_origen, id_estado_pedido, total_pedido
                     ) VALUES (
-                        :id_pedido, NVL(:fecha_pedido, SYSDATE), :id_cliente, :id_empleado_vendedor,
-                        :id_sucursal_origen, :id_estado_pedido, :total_pedido
+                        :id_pedido, :fecha_pedido, :id_cliente, :id_empleado_vendedor, :id_sucursal_origen, :id_estado_pedido, :total_pedido
                     )
-                """
-                cursor.execute(sql, {
-                    "id_pedido": id_pedido, "fecha_pedido": fecha_para_insertar, "id_cliente": id_cliente,
-                    "id_empleado_vendedor": id_empleado_vendedor, "id_sucursal_origen": id_sucursal_origen,
-                    "id_estado_pedido": id_estado_pedido, "total_pedido": total_pedido
+                """, {
+                    "id_pedido": id_pedido,
+                    "fecha_pedido": fecha_pedido,
+                    "id_cliente": payload.id_cliente,
+                    "id_empleado_vendedor": id_empleado_vendedor,
+                    "id_sucursal_origen": id_sucursal_origen,
+                    "id_estado_pedido": id_estado_pedido,
+                    "total_pedido": payload.total_pedido
                 })
+
+                for detalle in payload.detalles:
+                    cursor.execute("SELECT NVL(MAX(id_detalle_pedido), 0) + 1 FROM detalle_pedido")
+                    id_detalle_pedido = cursor.fetchone()[0]
+                    cursor.execute("""
+                        INSERT INTO detalle_pedido (id_detalle_pedido, id_pedido, id_producto, cantidad, precio_unitario_venta, subtotal)
+                        VALUES (:id_detalle_pedido, :id_pedido, :id_producto, :cantidad, :precio_unitario_venta, :subtotal)
+                    """, {
+                        "id_detalle_pedido": id_detalle_pedido,
+                        "id_pedido": id_pedido,
+                        "id_producto": detalle.id_producto,
+                        "cantidad": detalle.cantidad,
+                        "precio_unitario_venta": detalle.precio_unitario_venta,
+                        "subtotal": detalle.subtotal
+                    })
                 cone.commit()
-                return {"Mensaje": "Pedido creado con éxito"}
-    except oracledb.DatabaseError as e:
-        error_obj, = e.args
-        if error_obj.code == 1: 
-            raise HTTPException(status_code=status.HTTP_409_CONFLICT, detail=f"Error de BD: Violación de restricción única (ID de pedido ya existe).")
-        elif error_obj.code == 2291: 
-             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail=f"Error de BD: Cliente, empleado, sucursal o estado de pedido no existe.")
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error de BD al crear pedido: {error_obj.message.strip()}")
-    except Exception as ex:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=f"Error inesperado al crear pedido: {str(ex)}")
+        return {"success": True, "id_pedido": id_pedido}
+    except Exception as e:
+        print("Error al registrar pedido:", str(e))
+        raise HTTPException(status_code=500, detail=f"Error al registrar pedido: {str(e)}")
 
 @app.put("/pedidoputid/{id_pedido_param}", tags=["Pedidos"])
 def actualizar_pedido(
