@@ -1,13 +1,11 @@
 import asyncio
-import datetime
 import logging
 import os
 import shutil
 import requests
 import oracledb
 
-from datetime import date
-from datetime import datetime
+from datetime import datetime, date
 from fastapi import (
     Depends,
     FastAPI,
