@@ -15,6 +15,7 @@ from fastapi import (
     Response,
     UploadFile,
     status,
+    Form,
 )
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
@@ -217,7 +218,6 @@ def paypal_create_order(cart: List[CartItem]):
 
 @app.post("/paypal/capture/", tags=["Pedidos"])
 def paypal_capture(data: PayPalCaptureRequest):
-    # 1. Obtener access_token de PayPal
     auth = (PAYPAL_CLIENT_ID, PAYPAL_SECRET)
     token_resp = requests.post(
         f"{PAYPAL_API}/v1/oauth2/token",
@@ -229,7 +229,6 @@ def paypal_capture(data: PayPalCaptureRequest):
         raise HTTPException(status_code=500, detail="No se pudo autenticar con PayPal")
     access_token = token_resp.json().get("access_token")
 
-    # 2. Capturar la orden
     capture_resp = requests.post(
         f"{PAYPAL_API}/v2/checkout/orders/{data.orderID}/capture",
         headers={"Authorization": f"Bearer {access_token}", "Content-Type": "application/json"},
@@ -238,11 +237,9 @@ def paypal_capture(data: PayPalCaptureRequest):
     if capture_resp.status_code not in (200, 201) or capture_data.get("status") != "COMPLETED":
         raise HTTPException(status_code=400, detail="El pago no fue completado en PayPal")
 
-    # 3. Registrar el pedido en Oracle
     try:
         with get_conexion() as cone:
             with cone.cursor() as cursor:
-                # Obtener el siguiente id_pedido
                 cursor.execute("SELECT NVL(MAX(id_pedido), 0) + 1 FROM pedido")
                 id_pedido = cursor.fetchone()[0]
                 id_estado_pedido = 1  # Por ejemplo: 1 = "Pendiente"
@@ -2910,14 +2907,14 @@ def eliminar_pedido(id_pedido_param: int):
 
 @app.patch("/pedidopatch/{id_pedido_param}", tags=["Pedidos"])
 def actualizar_parcial_pedido(
-    id_pedido_param: int,
-    fecha_pedido_str: Optional[str] = None,
-    id_cliente: Optional[int] = None,
-    id_empleado_vendedor: Optional[int] = None,
-    id_sucursal_origen: Optional[int] = None,
-    id_estado_pedido: Optional[int] = None,
-    total_pedido: Optional[float] = None
-):
+        id_pedido_param: int,
+        fecha_pedido_str: Optional[str] = Form(None),
+        id_cliente: Optional[int] = Form(None),
+        id_empleado_vendedor: Optional[int] = Form(None),
+        id_sucursal_origen: Optional[int] = Form(None),
+        id_estado_pedido: Optional[int] = Form(None),
+        total_pedido: Optional[float] = Form(None)
+    ):
     try:
         if not any([fecha_pedido_str, id_cliente is not None, id_empleado_vendedor is not None, 
                     id_sucursal_origen is not None, id_estado_pedido is not None, total_pedido is not None]):
